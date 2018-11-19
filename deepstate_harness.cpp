@@ -111,8 +111,11 @@ TEST(RBTree, GeneralFuzzer) {
 	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
 	    }
 	  });
-    checkRep(tree);
+    LOG(INFO) << "checkRep...";
+    checkRep(tree); 
+    LOG(INFO) << "RBTreeVerify...";   
     RBTreeVerify(tree);
   }
+  LOG(INFO) << "Destroying the tree...";
   RBTreeDestroy(tree);
 }
