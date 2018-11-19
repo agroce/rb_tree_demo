@@ -61,15 +61,17 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int* ip = intP();
 	    void* vp = voidP();
+	    LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;
 	    RBTreeInsert(tree, ip, vp);
 	    containerInsert(*ip, vp);
 	  },
 	  [&} {
 	    int* ip = intP();
+	    LOG(INFO) << n << ": FIND:" << *ip;
 	    if ((newNode=RBExactQuery(tree, &ip))) {
-	      ASSERT (containerFind(*ip)) << "Expect to find " << *ip;
+	      ASSERT (containerFind(*ip)) << "Expected to find " << *ip;
 	    } else {
-	      ASSERT (!containerFind(*ip)) << "Expect not to find " << *ip;
+	      ASSERT (!containerFind(*ip)) << "Expected not to find " << *ip;
 	    }
 	  });
   }
