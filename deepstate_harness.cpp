@@ -102,8 +102,10 @@ TEST(RBTree, GeneralFuzzer) {
 	    LOG(INFO) << n << ": FIND:" << *ip;
 	    if ((node = RBExactQuery(tree, ip))) {
 	      ASSERT(containerFind(*ip)) << "Expected to find " << *ip;
+	      free(ip);
 	    } else {
 	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
+	      free(ip);
 	    }
 	  },
 	  [&] {
@@ -115,6 +117,7 @@ TEST(RBTree, GeneralFuzzer) {
 	      containerDelete(*ip);
 	    } else {
 	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
+	      free(ip);
 	    }
 	  });
     LOG(INFO) << "checkRep...";
