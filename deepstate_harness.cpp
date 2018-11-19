@@ -73,6 +73,17 @@ TEST(RBTree, GeneralFuzzer) {
 	    } else {
 	      ASSERT (!containerFind(*ip)) << "Expected not to find " << *ip;
 	    }
+	  },
+	  [&] {
+	    int* ip = intP();
+	    LOG(INFO) << n << ": DELETE:" << *ip;
+	    if ((newNode=RBExactQuery(tree, ip))) {
+	      ASSERT (containerFind(*ip)) << "Expected to find " << *ip;
+	      RBDelete(tree, newNode);
+	      containerDelete(*ip);
+	    } else {
+	      ASSERT (!containerFind(*ip)) << "Expected not to find " << *ip;
+	    }
 	  });
   }
   RBTreeDestroy(tree);
