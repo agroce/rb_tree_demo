@@ -48,20 +48,48 @@ void *voidP() {
   return (void *)p;
 }
 
+bool noDuplicates;
+
+int idx;
+
+void InorderTreeVerify(rb_red_blk_tree* tree, rb_red_blk_node* x) {
+  if (x != tree->nil) {
+    struct elt_t e;
+    InorderTreeVerify(tree,x->left);
+    e = containerGet (idx);
+    ASSERT(e.val == *(int *)x->key) << e.val "should equal" *(int *)x->key;
+    if (noDuplicates)
+      ASSERT(e.info == x->info) << e.info << "should equal" << x->info;
+    idx = containerNext (idx);
+    InorderTreeVerify(tree,x->right);
+  }
+}
+
+void RBTreeVerify(rb_red_blk_tree* tree) {
+  idx = containerStart();
+  InorderTreeVerify(tree,tree->root->left);
+  ASSERT(idx == -1) << "idx should be -1!";
+}
+
+
 TEST(RBTree, GeneralFuzzer) {
   rb_red_blk_node* node;
   rb_red_blk_tree* tree;
   tree = RBTreeCreate(IntComp, IntDest, InfoDest, IntPrint, InfoPrint);
   containerCreate();
+
+  noDuplicates = DeepState_Bool();
   
   for (int n = 0; n < LENGTH; n++) {
     OneOf(
 	  [&] {
 	    int* ip = intP();
-	    void* vp = voidP();
-	    LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;
-	    RBTreeInsert(tree, ip, vp);
-	    containerInsert(*ip, vp);
+	    if (!noDuplicates || !containerFind(*ip)) {
+	      void* vp = voidP();
+	      LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;
+	      RBTreeInsert(tree, ip, vp);
+	      containerInsert(*ip, vp);
+	    }
 	  },
 	  [&] {
 	    int* ip = intP();
@@ -83,6 +111,8 @@ TEST(RBTree, GeneralFuzzer) {
 	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
 	    }
 	  });
+    checkRep(tree);
+    RBTreeVerify(tree);
   }
   RBTreeDestroy(tree);
 }
