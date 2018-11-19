@@ -57,7 +57,7 @@ void InorderTreeVerify(rb_red_blk_tree* tree, rb_red_blk_node* x) {
     struct elt_t e;
     InorderTreeVerify(tree,x->left);
     e = containerGet (idx);
-    ASSERT(e.val == *(int *)x->key) << e.val "should equal" << *(int *)x->key;
+    ASSERT(e.val == *(int *)x->key) << e.val << "should equal" << *(int *)x->key;
     if (noDuplicates)
       ASSERT(e.info == x->info) << e.info << "should equal" << x->info;
     idx = containerNext (idx);
