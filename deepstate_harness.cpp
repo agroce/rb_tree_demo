@@ -136,9 +136,30 @@ TEST(RBTree, GeneralFuzzer) {
 		}
 	      }
 	    } else {
+	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!")	      
 	      ASSERT(res==KEY_NOT_FOUND) << "Should not be found!";
 	    } 	    
-	  }
+	  },
+	  [&] {
+	    int res, key;
+	    int *ip = intP();
+	    LOG(INFO) << n << ": SUCC:" << *ip;
+	    res = containerSucc(*ip, &key);
+	    if ((node = RBExactQuery(tree,ip))) {
+	      node=TreeSuccessor(tree,node);
+	      if (noDuplicates) {
+		if(tree->nil == node) {
+		  ASSERT(res==NO_PRED_OR_SUCC) << "Should have no predecessor or successor!";
+		} else {
+		  ASSERT(res==FOUND) << "Should be found!";
+		  ASSERT(*(int *)node->key == key) << *(int *)node->key << " should equal " << key;
+		}
+	      }
+	    } else {
+	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!")
+	      ASSERT(res==KEY_NOT_FOUND) << " should not be found!";
+	    } 	    
+	  }	  
 	  );
     LOG(INFO) << "checkRep...";
     checkRep(tree); 
