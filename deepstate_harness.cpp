@@ -69,20 +69,20 @@ TEST(RBTree, GeneralFuzzer) {
 	    int* ip = intP();
 	    LOG(INFO) << n << ": FIND:" << *ip;
 	    if ((node = RBExactQuery(tree, ip))) {
-	      ASSERT containerFind(*ip) << "Expected to find " << *ip;
+	      ASSERT(containerFind(*ip)) << "Expected to find " << *ip;
 	    } else {
-	      ASSERT !containerFind(*ip) << "Expected not to find " << *ip;
+	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
 	    }
 	  },
 	  [&] {
 	    int* ip = intP();
 	    LOG(INFO) << n << ": DELETE:" << *ip;
 	    if ((node = RBExactQuery(tree, ip))) {
-	      ASSERT containerFind(*ip) << "Expected to find " << *ip;
+	      ASSERT(containerFind(*ip)) << "Expected to find " << *ip;
 	      RBDelete(tree, node);
 	      containerDelete(*ip);
 	    } else {
-	      ASSERT !containerFind(*ip) << "Expected not to find " << *ip;
+	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
 	    }
 	  });
   }
