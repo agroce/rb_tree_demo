@@ -65,4 +65,5 @@ TEST(RBTree, GeneralFuzzer) {
 	    containerInsert(*ip, vp);
 	  });
   }
+  RBTreeDestroy(tree);
 }
