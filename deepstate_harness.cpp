@@ -33,13 +33,12 @@ void InfoDest(void *a){
 
 int* intP() {
   symbolic_int x;
-  int *p = malloc(sizeof(int));
+  int *p = (int*)malloc(sizeof(int));
   *p = x;
   return p;
 }
 
-void *voidP (void)
-{
+void *voidP() {
   unsigned int *p = 0;
   int i;
   for (i=0; i<sizeof(p); i++) {
