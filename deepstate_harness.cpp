@@ -7,7 +7,7 @@ extern "C" {
 #include "container.h"
 }
 
-#define LENGTH 100
+#define LENGTH 10
 
 void IntDest(void* a) {
   free((int*)a);
@@ -51,9 +51,9 @@ void *voidP() {
 TEST(RBTree, GeneralFuzzer) {
   int n;
   
-  rb_red_blk_node* newNode;
+  rb_red_blk_node* node;
   rb_red_blk_tree* tree;
-  tree=RBTreeCreate(IntComp,IntDest,InfoDest,IntPrint,InfoPrint);
+  tree = RBTreeCreate(IntComp, IntDest, InfoDest, IntPrint, InfoPrint);
   containerCreate();
   
   for (int n = 0; n < LENGTH; n++) {
@@ -68,21 +68,21 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int* ip = intP();
 	    LOG(INFO) << n << ": FIND:" << *ip;
-	    if ((newNode=RBExactQuery(tree, ip))) {
-	      ASSERT (containerFind(*ip)) << "Expected to find " << *ip;
+	    if ((node = RBExactQuery(tree, ip))) {
+	      ASSERT containerFind(*ip) << "Expected to find " << *ip;
 	    } else {
-	      ASSERT (!containerFind(*ip)) << "Expected not to find " << *ip;
+	      ASSERT !containerFind(*ip) << "Expected not to find " << *ip;
 	    }
 	  },
 	  [&] {
 	    int* ip = intP();
 	    LOG(INFO) << n << ": DELETE:" << *ip;
-	    if ((newNode=RBExactQuery(tree, ip))) {
-	      ASSERT (containerFind(*ip)) << "Expected to find " << *ip;
-	      RBDelete(tree, newNode);
+	    if ((node = RBExactQuery(tree, ip))) {
+	      ASSERT containerFind(*ip) << "Expected to find " << *ip;
+	      RBDelete(tree, node);
 	      containerDelete(*ip);
 	    } else {
-	      ASSERT (!containerFind(*ip)) << "Expected not to find " << *ip;
+	      ASSERT !containerFind(*ip) << "Expected not to find " << *ip;
 	    }
 	  });
   }
