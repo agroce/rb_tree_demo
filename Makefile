@@ -14,7 +14,9 @@ OBJS = red_black_tree.o stack.o test_red_black_tree.o misc.o
 
 OBJS2 = red_black_tree.o stack.o fuzz_red_black_tree.o misc.o container.o
 
-CC = gcc
+OBJSDS = red_black_tree.o stack.o misc.o container.o
+
+CC = clang -fsanitize=undefined,integer,address
 #CC = clang -fsanitize=integer
 
 #CFLAGS = -g -O0 -coverage -fprofile-arcs -Wall -pedantic
@@ -23,6 +25,12 @@ CFLAGS = -O3 -Wall -pedantic
 PROGRAM = test_rb
 
 PROGRAM2 = fuzz_rb
+
+# DeepState executable
+DS1 = ds_rb
+
+# libFuzzer executable
+DS2 = ds_rb_lf
 
 .PHONY:	mem_check clean
 
@@ -33,6 +41,12 @@ $(PROGRAM): 	$(OBJS)
 
 $(PROGRAM2): 	$(OBJS2)
 		$(CC) $(CFLAGS) $(OBJS2) -o $(PROGRAM2) $(DMALLOC_LIB)
+
+$(DS1): 	$(OBJSDS) deepstate_harness.cpp
+		clang++ $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate -fsanitize=undefined,integer,address
+
+$(DS2): 	$(OBJSDS) deepstate_harness.cpp
+		clang++ $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDS) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
 
 mem_check:	
 		@if [ -e makefile.txt ] ; then \
