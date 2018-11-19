@@ -34,7 +34,7 @@ DS2 = ds_rb_lf
 
 .PHONY:	mem_check clean
 
-all: $(PROGRAM) $(PROGRAM2)
+all: $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2)
 
 $(PROGRAM): 	$(OBJS)
 		$(CC) $(CFLAGS) $(OBJS) -o $(PROGRAM) $(DMALLOC_LIB)
