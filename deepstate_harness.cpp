@@ -136,7 +136,7 @@ TEST(RBTree, GeneralFuzzer) {
 		}
 	      }
 	    } else {
-	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!")	      
+	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!";	      
 	      ASSERT(res==KEY_NOT_FOUND) << "Should not be found!";
 	    } 	    
 	  },
@@ -156,7 +156,7 @@ TEST(RBTree, GeneralFuzzer) {
 		}
 	      }
 	    } else {
-	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!")
+	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!";
 	      ASSERT(res==KEY_NOT_FOUND) << " should not be found!";
 	    } 	    
 	  }	  
