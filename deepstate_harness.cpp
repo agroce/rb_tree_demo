@@ -65,7 +65,7 @@ TEST(RBTree, GeneralFuzzer) {
 	    RBTreeInsert(tree, ip, vp);
 	    containerInsert(*ip, vp);
 	  },
-	  [&} {
+	  [&] {
 	    int* ip = intP();
 	    LOG(INFO) << n << ": FIND:" << *ip;
 	    if ((newNode=RBExactQuery(tree, &ip))) {
