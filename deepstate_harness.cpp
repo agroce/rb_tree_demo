@@ -79,6 +79,9 @@ TEST(RBTree, GeneralFuzzer) {
   containerCreate();
 
   noDuplicates = DeepState_Bool();
+  if (noDuplicates) {
+    LOG(INFO) << "No duplicates allowed.";
+  }
   
   for (int n = 0; n < LENGTH; n++) {
     OneOf(
@@ -89,6 +92,8 @@ TEST(RBTree, GeneralFuzzer) {
 	      LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;
 	      RBTreeInsert(tree, ip, vp);
 	      containerInsert(*ip, vp);
+	    } else {
+	      LOG(INFO) << n << ": AVOIDING DUPLICATE INSERT:" << *ip;	      
 	    }
 	  },
 	  [&] {
