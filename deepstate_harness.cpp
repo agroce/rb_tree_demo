@@ -63,6 +63,14 @@ TEST(RBTree, GeneralFuzzer) {
 	    void* vp = voidP();
 	    RBTreeInsert(tree, ip, vp);
 	    containerInsert(*ip, vp);
+	  },
+	  [&} {
+	    int* ip = intP();
+	    if ((newNode=RBExactQuery(tree, &ip))) {
+	      ASSERT (containerFind(*ip)) << "Expect to find " << *ip;
+	    } else {
+	      ASSERT (!containerFind(*ip)) << "Expect not to find " << *ip;
+	    }
 	  });
   }
   RBTreeDestroy(tree);
