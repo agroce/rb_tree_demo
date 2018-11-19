@@ -57,9 +57,9 @@ void InorderTreeVerify(rb_red_blk_tree* tree, rb_red_blk_node* x) {
     struct elt_t e;
     InorderTreeVerify(tree,x->left);
     e = containerGet (idx);
-    ASSERT(e.val == *(int *)x->key) << e.val << "should equal" << *(int *)x->key;
+    ASSERT(e.val == *(int *)x->key) << e.val << " should equal " << *(int *)x->key;
     if (noDuplicates)
-      ASSERT(e.info == x->info) << e.info << "should equal" << x->info;
+      ASSERT(e.info == x->info) << e.info << " should equal " << x->info;
     idx = containerNext (idx);
     InorderTreeVerify(tree,x->right);
   }
@@ -129,16 +129,17 @@ TEST(RBTree, GeneralFuzzer) {
 	      node=TreePredecessor(tree,node);
 	      if (noDuplicates) {
 		if(tree->nil == node) {
-		  ASSERT(res==NO_PRED_OR_SUCC) << "Should have no predecessor or successor!";
+		  ASSERT(res==NO_PRED_OR_SUCC) << *ip << " should have no predecessor or successor!";
 		} else {
-		  ASSERT(res==FOUND) << "Should be found!";
-		  ASSERT(*(int *)node->key == key) << *(int *)node->key << "should equal" << key;
+		  ASSERT(res==FOUND) << "Expected to find " << *ip;
+		  ASSERT(*(int *)node->key == key) << *(int *)node->key << " should equal " << key;
 		}
 	      }
 	    } else {
-	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!";	      
-	      ASSERT(res==KEY_NOT_FOUND) << "Should not be found!";
-	    } 	    
+	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
+	      ASSERT(res==KEY_NOT_FOUND) << "Expected not to find " << *ip;
+	    }
+	    free(ip);
 	  },
 	  [&] {
 	    int res, key;
@@ -149,17 +150,18 @@ TEST(RBTree, GeneralFuzzer) {
 	      node=TreeSuccessor(tree,node);
 	      if (noDuplicates) {
 		if(tree->nil == node) {
-		  ASSERT(res==NO_PRED_OR_SUCC) << "Should have no predecessor or successor!";
+		  ASSERT(res==NO_PRED_OR_SUCC) << *ip << " should have no predecessor or successor!";
 		} else {
-		  ASSERT(res==FOUND) << "Should be found!";
+		  ASSERT(res==FOUND) << "Expected to find " << *ip;
 		  ASSERT(*(int *)node->key == key) << *(int *)node->key << " should equal " << key;
 		}
 	      }
 	    } else {
-	      ASSERT(!containerFind(*ip)) << *ip << " should not be found!";
-	      ASSERT(res==KEY_NOT_FOUND) << " should not be found!";
-	    } 	    
-	  }	  
+	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
+	      ASSERT(res==KEY_NOT_FOUND) << "Expected not to find " << *ip;
+	    }
+	    free(ip);
+	  }
 	  );
     LOG(INFO) << "checkRep...";
     checkRep(tree); 
