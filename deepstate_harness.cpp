@@ -39,7 +39,7 @@ int* intP() {
 }
 
 void *voidP() {
-  unsigned int *p = 0;
+  uintptr_t p = 0;
   int i;
   for (i=0; i<sizeof(p); i++) {
     p <<= 8;
@@ -64,4 +64,5 @@ TEST(RBTree, GeneralFuzzer) {
 	    RBTreeInsert(tree, ip, vp);
 	    containerInsert(*ip, vp);
 	  });
+  }
 }
