@@ -49,8 +49,6 @@ void *voidP() {
 }
 
 TEST(RBTree, GeneralFuzzer) {
-  int n;
-  
   rb_red_blk_node* node;
   rb_red_blk_tree* tree;
   tree = RBTreeCreate(IntComp, IntDest, InfoDest, IntPrint, InfoPrint);
