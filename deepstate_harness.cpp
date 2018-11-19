@@ -93,7 +93,8 @@ TEST(RBTree, GeneralFuzzer) {
 	      RBTreeInsert(tree, ip, vp);
 	      containerInsert(*ip, vp);
 	    } else {
-	      LOG(INFO) << n << ": AVOIDING DUPLICATE INSERT:" << *ip;	      
+	      LOG(INFO) << n << ": AVOIDING DUPLICATE INSERT:" << *ip;
+	      free(ip);	      
 	    }
 	  },
 	  [&] {
