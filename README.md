@@ -31,4 +31,8 @@ $ pip install universalmutator
 $ mutate red_black_tree.c
 ```
 
-Then you can analyze a set of tests generated using the findfailures.py script and universalmutator's analysis tools.
+Then you can analyze a set of tests generated like this:
+
+```shell
+$ analyze_mutants red_black_tree.c "python findfailures.py corpus"
+```
