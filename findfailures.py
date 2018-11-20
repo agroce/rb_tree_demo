@@ -1,3 +1,4 @@
+from __future__ import print_function
 import subprocess
 import sys
 import glob
@@ -40,9 +41,9 @@ for f in glob.glob(corpus + "/*"):
             if stepcount < fatals[fatalline][0]:
                 fatals[fatalline] = (stepcount, f)
 for fatal in fatals:
-    print fatal, fatals[fatal]
+    print (fatal, fatals[fatal])
 for crash in crashes:
-    print crash, crashes[crash]    
+    print (crash, crashes[crash])
         
 if len(fatals) > 0:
     sys.exit(255)
