@@ -67,8 +67,8 @@ void RBTreeVerify(rb_red_blk_tree* tree) {
 
 TEST(RBTree, GeneralFuzzer) {
   rb_red_blk_node* node;
-  rb_red_blk_tree* tree;
-  tree = RBTreeCreate(IntComp, IntDest, InfoDest, IntPrint, InfoPrint);
+  
+  rb_red_blk_tree* tree = RBTreeCreate(IntComp, IntDest, InfoDest, IntPrint, InfoPrint);  
   containerCreate();
 
   noDuplicates = DeepState_Bool();
@@ -95,8 +95,8 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int key = DeepState_Int();
 	    LOG(INFO) << n << ": FIND:" << key;
-	    if ((node = RBExactQuery(tree, &k))) {
-	      ASSERT(containerFind(*ip)) << "Expected to find " << key;
+	    if ((node = RBExactQuery(tree, &key))) {
+	      ASSERT(containerFind(key)) << "Expected to find " << key;
 	    } else {
 	      ASSERT(!containerFind(key)) << "Expected not to find " << key;
 	    }
@@ -115,16 +115,16 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int key1 = DeepState_Int();	    
 	    int res, key2;
-	    LOG(INFO) << n << ": PRED:" << key;
+	    LOG(INFO) << n << ": PRED:" << key1;
 	    res = containerPred(key1, &key2);
 	    if ((node = RBExactQuery(tree, &key1))) {
-	      node=TreePredecessor(tree,node);
+	      node = TreePredecessor(tree, node);
 	      if (noDuplicates) {
 		if(tree->nil == node) {
 		  ASSERT(res==NO_PRED_OR_SUCC) << key1 << " should have no predecessor or successor!";
 		} else {
 		  ASSERT(res==FOUND) << "Expected to find " << key1;
-		  ASSERT(*(int *)node->key2 == key2) << *(int *)node->key2 << " should equal " << key2;
+		  ASSERT(*(int *)node->key == key2) << *(int *)node->key << " should equal " << key2;
 		}
 	      }
 	    } else {
@@ -135,16 +135,16 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int key1 = DeepState_Int();	    
 	    int res, key2;
-	    LOG(INFO) << n << ": SUCC:" << key;
+	    LOG(INFO) << n << ": SUCC:" << key2;
 	    res = containerSucc(key1, &key2);
 	    if ((node = RBExactQuery(tree, &key1))) {
-	      node=TreeSucccessor(tree,node);
+	      node = TreeSuccessor(tree, node);
 	      if (noDuplicates) {
 		if(tree->nil == node) {
 		  ASSERT(res==NO_PRED_OR_SUCC) << key1 << " should have no predecessor or successor!";
 		} else {
 		  ASSERT(res==FOUND) << "Expected to find " << key1;
-		  ASSERT(*(int *)node->key2 == key2) << *(int *)node->key2 << " should equal " << key2;
+		  ASSERT(*(int *)node->key == key2) << *(int *)node->key << " should equal " << key2;
 		}
 	      }
 	    } else {
@@ -157,7 +157,7 @@ TEST(RBTree, GeneralFuzzer) {
 	    int key1 = DeepState_Int();
 	    int key2 = DeepState_Int();
 	    i = containerStartVal(key1, key2);
-	    enumResult = RBEnumerate(tree, &key1, &key2);	  
+	    stk_stack *enumResult = RBEnumerate(tree, &key1, &key2);	  
 	    while ((node = StackPop(enumResult))) {
 	      struct elt_t e;
 	      ASSERT(i != -1) << "i should never be -1";
