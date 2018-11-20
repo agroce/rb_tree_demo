@@ -135,7 +135,7 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int key1 = DeepState_Int();	    
 	    int res, key2;
-	    LOG(INFO) << n << ": SUCC:" << key2;
+	    LOG(INFO) << n << ": SUCC:" << key1;
 	    res = containerSucc(key1, &key2);
 	    if ((node = RBExactQuery(tree, &key1))) {
 	      node = TreeSuccessor(tree, node);
@@ -158,7 +158,7 @@ TEST(RBTree, GeneralFuzzer) {
 	    int key2 = DeepState_Int();
 	    i = containerStartVal(key1, key2);
 	    stk_stack *enumResult = RBEnumerate(tree, &key1, &key2);	  
-	    while ((node = StackPop(enumResult))) {
+	    while ((node = (rb_red_blk_node *)StackPop(enumResult))) {
 	      struct elt_t e;
 	      ASSERT(i != -1) << "i should never be -1";
 	      e = containerGet(i);
