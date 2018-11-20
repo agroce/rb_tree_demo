@@ -9,6 +9,10 @@ cmd = "./ds_rb --input_test_file "
 crashes = {}
 fatals = {}
 
+build = subprocess.call(["make"], shell=True)
+if build != 0:
+    sys.exit(255)
+
 for f in glob.glob(corpus + "/*"):
     with open("test.out", 'w') as outf:
         subprocess.call([cmd + f], shell=True, stdout=outf, stderr=outf)
