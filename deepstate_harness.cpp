@@ -31,13 +31,6 @@ void InfoDest(void *a){
   ;
 }
 
-int* intP() {
-  symbolic_int x;
-  int *p = (int*)malloc(sizeof(int));
-  *p = x;
-  return p;
-}
-
 void *voidP() {
   uintptr_t p = 0;
   int i;
@@ -86,7 +79,9 @@ TEST(RBTree, GeneralFuzzer) {
   for (int n = 0; n < LENGTH; n++) {
     OneOf(
 	  [&] {
-	    int* ip = intP();
+	    int key = DeepState_Int();
+	    int* ip = (int*)malloc(sizeof(int));
+	    *ip = key;
 	    if (!noDuplicates || !containerFind(*ip)) {
 	      void* vp = voidP();
 	      LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;
@@ -98,69 +93,82 @@ TEST(RBTree, GeneralFuzzer) {
 	    }
 	  },
 	  [&] {
-	    int* ip = intP();
-	    LOG(INFO) << n << ": FIND:" << *ip;
-	    if ((node = RBExactQuery(tree, ip))) {
-	      ASSERT(containerFind(*ip)) << "Expected to find " << *ip;
-	      free(ip);
+	    int key = DeepState_Int();
+	    LOG(INFO) << n << ": FIND:" << key;
+	    if ((node = RBExactQuery(tree, &k))) {
+	      ASSERT(containerFind(*ip)) << "Expected to find " << key;
 	    } else {
-	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
-	      free(ip);
+	      ASSERT(!containerFind(key)) << "Expected not to find " << key;
 	    }
 	  },
 	  [&] {
-	    int* ip = intP();
-	    LOG(INFO) << n << ": DELETE:" << *ip;
-	    if ((node = RBExactQuery(tree, ip))) {
-	      ASSERT(containerFind(*ip)) << "Expected to find " << *ip;
+	    int key = DeepState_Int();
+	    LOG(INFO) << n << ": DELETE:" << key;
+	    if ((node = RBExactQuery(tree, &key))) {
+	      ASSERT(containerFind(key)) << "Expected to find " << key;
 	      RBDelete(tree, node);
-	      containerDelete(*ip);
+	      containerDelete(key);
 	    } else {
-	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
-	      free(ip);
+	      ASSERT(!containerFind(key)) << "Expected not to find " << key;
 	    }
 	  },
 	  [&] {
-	    int res, key;
-	    int *ip = intP();
-	    LOG(INFO) << n << ": PRED:" << *ip;
-	    res = containerPred(*ip, &key);
-	    if ((node = RBExactQuery(tree,ip))) {
+	    int key1 = DeepState_Int();	    
+	    int res, key2;
+	    LOG(INFO) << n << ": PRED:" << key;
+	    res = containerPred(key1, &key2);
+	    if ((node = RBExactQuery(tree, &key1))) {
 	      node=TreePredecessor(tree,node);
 	      if (noDuplicates) {
 		if(tree->nil == node) {
-		  ASSERT(res==NO_PRED_OR_SUCC) << *ip << " should have no predecessor or successor!";
+		  ASSERT(res==NO_PRED_OR_SUCC) << key1 << " should have no predecessor or successor!";
 		} else {
-		  ASSERT(res==FOUND) << "Expected to find " << *ip;
-		  ASSERT(*(int *)node->key == key) << *(int *)node->key << " should equal " << key;
+		  ASSERT(res==FOUND) << "Expected to find " << key1;
+		  ASSERT(*(int *)node->key2 == key2) << *(int *)node->key2 << " should equal " << key2;
 		}
 	      }
 	    } else {
-	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
-	      ASSERT(res==KEY_NOT_FOUND) << "Expected not to find " << *ip;
+	      ASSERT(!containerFind(key1)) << "Expected not to find " << key1;
+	      ASSERT(res==KEY_NOT_FOUND) << "Expected not to find " << key1;
 	    }
-	    free(ip);
 	  },
 	  [&] {
-	    int res, key;
-	    int *ip = intP();
-	    LOG(INFO) << n << ": SUCC:" << *ip;
-	    res = containerSucc(*ip, &key);
-	    if ((node = RBExactQuery(tree,ip))) {
-	      node=TreeSuccessor(tree,node);
+	    int key1 = DeepState_Int();	    
+	    int res, key2;
+	    LOG(INFO) << n << ": SUCC:" << key;
+	    res = containerSucc(key1, &key2);
+	    if ((node = RBExactQuery(tree, &key1))) {
+	      node=TreeSucccessor(tree,node);
 	      if (noDuplicates) {
 		if(tree->nil == node) {
-		  ASSERT(res==NO_PRED_OR_SUCC) << *ip << " should have no predecessor or successor!";
+		  ASSERT(res==NO_PRED_OR_SUCC) << key1 << " should have no predecessor or successor!";
 		} else {
-		  ASSERT(res==FOUND) << "Expected to find " << *ip;
-		  ASSERT(*(int *)node->key == key) << *(int *)node->key << " should equal " << key;
+		  ASSERT(res==FOUND) << "Expected to find " << key1;
+		  ASSERT(*(int *)node->key2 == key2) << *(int *)node->key2 << " should equal " << key2;
 		}
 	      }
 	    } else {
-	      ASSERT(!containerFind(*ip)) << "Expected not to find " << *ip;
-	      ASSERT(res==KEY_NOT_FOUND) << "Expected not to find " << *ip;
+	      ASSERT(!containerFind(key1)) << "Expected not to find " << key1;
+	      ASSERT(res==KEY_NOT_FOUND) << "Expected not to find " << key1;
 	    }
-	    free(ip);
+	  },
+	  [&] {
+	    int i;
+	    int key1 = DeepState_Int();
+	    int key2 = DeepState_Int();
+	    i = containerStartVal(key1, key2);
+	    enumResult = RBEnumerate(tree, &key1, &key2);	  
+	    while ((node = StackPop(enumResult))) {
+	      struct elt_t e;
+	      ASSERT(i != -1) << "i should never be -1";
+	      e = containerGet(i);
+	      ASSERT(e.val == *(int *)newNode->key) << e.val << " should equal " *(int *)node->key;
+	      if (noDuplicates)
+		ASSERT(e.info == node->info) << e.info " should equal" << node.info;
+	      i = containerNextVal(key2, i);
+	    }
+	    ASSERT(i==-1) << "i should never be -1";
+	    free(enumResult);
 	  }
 	  );
     LOG(INFO) << "checkRep...";
