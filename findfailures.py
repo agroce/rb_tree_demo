@@ -40,3 +40,8 @@ for fatal in fatals:
 for crash in crashes:
     print crash, crashes[crash]    
         
+if len(fatals) > 0:
+    sys.exit(255)
+if len(crashes) > 0:
+    sys.exit(255)
+sys.exit(0)
