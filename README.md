@@ -10,7 +10,7 @@ John Regehr posted it on GitHub:
 https://github.com/regehr/rb_tree_demo
 
 The original code is still there, but this adds a new file,
-deepstate_harness.cpp, that uses DeepState instead of a C random
+deepstate_harness.cpp, that uses [DeepState](https://github.com/trailofbits/deepstate) instead of a C random
 number generator, to perform (I think) the same testing as John's
 harness.  The Makefile will build two executables, `ds_rb` and
 `ds_rb_lf`, the first of which is for symbolic execution, test replay,
