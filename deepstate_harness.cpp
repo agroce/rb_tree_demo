@@ -162,9 +162,9 @@ TEST(RBTree, GeneralFuzzer) {
 	      struct elt_t e;
 	      ASSERT(i != -1) << "i should never be -1";
 	      e = containerGet(i);
-	      ASSERT(e.val == *(int *)node->key) << e.val << " should equal " *(int *)node->key;
+	      ASSERT(e.val == *(int *)node->key) << e.val << " should equal " << *(int *)node->key;
 	      if (noDuplicates)
-		ASSERT(e.info == node->info) << e.info << " should equal" << node.info;
+		ASSERT(e.info == node->info) << e.info << " should equal" << node->info;
 	      i = containerNextVal(key2, i);
 	    }
 	    ASSERT(i==-1) << "i should never be -1";
