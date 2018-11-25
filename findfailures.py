@@ -12,6 +12,7 @@ fatals = {}
 
 build = subprocess.call(["make"], shell=True)
 if build != 0:
+    print ("FAILED TO COMPILE")
     sys.exit(255)
 
 for f in glob.glob(corpus + "/*"):
@@ -44,7 +45,8 @@ for fatal in fatals:
     print (fatal, fatals[fatal])
 for crash in crashes:
     print (crash, crashes[crash])
-        
+
+print (len(fatals), "FATALS", len(crashes), "CRASHES")
 if len(fatals) > 0:
     sys.exit(255)
 if len(crashes) > 0:
