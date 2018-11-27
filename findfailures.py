@@ -25,6 +25,10 @@ for f in glob.glob(corpus + "/*"):
         for line in inf:
             if "Crash" in line:
                 crashline = line
+            if "UndefinedBehaviorSanitizer" in line:
+                crashline = line
+            if "AddressSanitizer" in line:
+                crashline = line
             if "FATAL" in line:
                 fatalline = line
             if "STEP" in line:
