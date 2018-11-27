@@ -30,7 +30,8 @@ coverages = []
 for line in open("fuzz.out"):
     if "COV:" in line:
         coverages.append(int(line.split()[-1]))
-print("COVERAGE CHANGE WITH NEW FUZZING:", coverages[0], "TO", coverages[-1])
+if len(coverages) > 0:
+    print("COVERAGE CHANGE WITH NEW FUZZING:", coverages[0], "TO", coverages[-1])
 print("THERE ARE NOW", len(glob.glob("newcorpus/*")), "TESTS")
 corpus = "newcorpus"
 
