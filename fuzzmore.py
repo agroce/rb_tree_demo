@@ -21,7 +21,7 @@ print("STARTING FROM", len(glob.glob(corpus + "/*")), "TESTS")
 
 subprocess.call(["rm -rf crash-*"], shell=True)
 subprocess.call(["rm -rf newcorpus"], shell=True)
-subprocess.call(["cp -r" + corpus + " newcorpus"], shell=True)
+subprocess.call(["cp -r " + corpus + " newcorpus"], shell=True)
 with open("fuzz.out", 'w') as ffile:
     subprocess.call(["./ds_rb_lf newcorpus -detect_leaks=0 -use_value_profile=1 -max_total_time=" + extratime], shell=True,
                         stderr=ffile, stdout=ffile)
