@@ -28,7 +28,7 @@ with open("fuzz.out", 'w') as ffile:
 subprocess.call("mv crash-* newcorpus", shell=True)
 coverages = []
 for line in open("fuzz.out"):
-    if "COV:" in line:
+    if "cov:" in line:
         coverages.append(int(line.split()[-1]))
 if len(coverages) > 0:
     print("COVERAGE CHANGE WITH NEW FUZZING:", coverages[0], "TO", coverages[-1])
