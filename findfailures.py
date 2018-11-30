@@ -4,6 +4,7 @@ import sys
 import glob
 
 corpus = sys.argv[1]
+fast = "--fast" in sys.argv
 
 cmd = "./ds_rb --input_test_file "
 
@@ -39,12 +40,18 @@ for f in glob.glob(corpus + "/*"):
         else:
             if stepcount < crashes[crashline][0]:
                 crashes[crashline] = (stepcount, f)
+        if fast:
+            print("ABORTING AFTER DETECTING ONE FAILURE")            
+            break
     if fatalline is not None:
         if fatalline not in fatals:
             fatals[fatalline] = (stepcount, f)
         else:
             if stepcount < fatals[fatalline][0]:
                 fatals[fatalline] = (stepcount, f)
+        if fast:
+            print("ABORTING AFTER DETECTING ONE FAILURE")
+            break
 for fatal in fatals:
     print (fatal, fatals[fatal])
 for crash in crashes:

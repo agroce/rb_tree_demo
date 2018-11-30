@@ -12,6 +12,10 @@ cmd = "./ds_rb --input_test_file "
 crashes = {}
 fatals = {}
 
+fastOption = ""
+if "--fast" in sys.argv:
+    fastOption = " --fast"
+
 build = subprocess.call(["make"], shell=True)
 if build != 0:
     print ("FAILED TO COMPILE")
@@ -34,6 +38,6 @@ if len(coverages) > 0:
     print("COVERAGE CHANGE WITH NEW FUZZING:", coverages[0], "TO", coverages[-1])
 print("THERE ARE NOW", len(glob.glob("newcorpus/*")), "TESTS")
 
-r = subprocess.call(["python findfailures.py newcorpus"], shell=True)
+r = subprocess.call(["python findfailures.py newcorpus " + fastOption], shell=True)
 sys.exit(r)
 
