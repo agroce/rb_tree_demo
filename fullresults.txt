@@ -2,5 +2,5 @@ Total mutants generated:			2602
 Mutants that compile:				1120
 
 Killed by 60s corpus:				527 (47.05%)
-Killed by 1800s corpus (from 60s corp):	
+Killed by 1800s corpus (from 60s corp):	546 (48.75%)
 Killed by 60s corpus + new 60s fuzz:	606 (54.11%)
