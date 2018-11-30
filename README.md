@@ -19,7 +19,7 @@ AFL fuzzing, etc., and the second of which is for libFuzzer fuzzing.
 To fuzz this, you will want to do something like:
 
 ```shell
-$ ds_rb_lf corpus -use_value_profile=1 -detect_leaks=0
+$ ./ds_rb_lf corpus -use_value_profile=1 -detect_leaks=0
 ```
 
 The leak detection disabling is because when the test terminates early due to violated assumes in ranges, etc., this will leak memory.
