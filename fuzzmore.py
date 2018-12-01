@@ -16,10 +16,14 @@ fastOption = ""
 if "--fast" in sys.argv:
     fastOption = " --fast"
 
-build = subprocess.call(["make"], shell=True)
+build = subprocess.call(["make ds_rb"], shell=True)
 if build != 0:
     print ("FAILED TO COMPILE")
     sys.exit(255)
+build = subprocess.call(["make ds_rb_lf"], shell=True)
+if build != 0:
+    print ("FAILED TO COMPILE")
+    sys.exit(255)    
 
 print("STARTING FROM", len(glob.glob(corpus + "/*")), "TESTS")
 
