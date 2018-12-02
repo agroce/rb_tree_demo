@@ -3,7 +3,8 @@ import subprocess
 import sys
 
 subprocess.call(["make fuzz_rb"], shell=True)
-subprocess.call(["./fuzz_rb >& fuzz.result"], shell=True)
+with open("fuzz.result",'w') as f:
+    subprocess.call(["./fuzz_rb"], shell=True, stdout=f, stderr=f)
 with open("fuzz.result",'r') as f:
     for l in f:
         print(l,end="")
