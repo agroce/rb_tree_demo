@@ -16,6 +16,8 @@ OBJS2 = red_black_tree.o stack.o fuzz_red_black_tree.o misc.o container.o
 
 OBJSDS = red_black_tree.o stack.o misc.o container.o
 
+OBJSDSLF = lf_red_black_tree.o lf_stack.o lf_misc.o lf_container.o
+
 CC = clang -fsanitize=undefined,integer,address
 #CC = clang -fsanitize=integer
 
@@ -45,8 +47,8 @@ $(PROGRAM2): 	$(OBJS2)
 $(DS1): 	$(OBJSDS) deepstate_harness.cpp
 		clang++ $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate -fsanitize=undefined,integer,address
 
-$(DS2): 	$(OBJSDS) deepstate_harness.cpp
-		clang++ $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDS) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
+$(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
+		clang++ $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
 
 mem_check:	
 		@if [ -e makefile.txt ] ; then \
@@ -76,6 +78,15 @@ test_red_black_tree.o:	test_red_black_tree.c red_black_tree.c stack.c stack.h re
 red_black_tree.o:	red_black_tree.h stack.h red_black_tree.c stack.c misc.h misc.c
 
 stack.o:		stack.c stack.h misc.h misc.c
+
+lf_red_black_tree.o:	red_black_tree.h stack.h red_black_tree.c stack.c misc.h misc.c
+			clang -c -o lf_red_black_tree.o red_black_tree.c -fsanitize=fuzzer-no-link,undefined,address,integer
+
+lf_stack.o:		stack.c stack.h misc.h misc.c
+			clang -c -o lf_stack.o stack.c -fsanitize=fuzzer-no-link,undefined,address,integer
+
+lf_misc.o:		misc.h misc.c
+			clang -c -o lf_misc.o misc.c -fsanitize=fuzzer-no-link,undefined,address,integer
 
 clean:			
 	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) *.gcda *.gcno *.gcov unfreed.txt
