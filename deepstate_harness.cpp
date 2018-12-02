@@ -7,7 +7,7 @@ extern "C" {
 #include "container.h"
 }
 
-#define LENGTH 10
+#define LENGTH 100
 
 void IntDest(void* a) {
   free((int*)a);
