@@ -245,6 +245,7 @@ int main() {
   current = clock();
   i = 0;
   while (((double)(current-start) / CLOCKS_PER_SEC) < TIMEOUT) {
+    printf("TIME: %d", (int)((double)(current-start)/CLOCKS_PER_SEC));
     current = clock();
     fuzzit();
     i++;
