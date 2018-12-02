@@ -85,6 +85,9 @@ lf_red_black_tree.o:	red_black_tree.h stack.h red_black_tree.c stack.c misc.h mi
 lf_stack.o:		stack.c stack.h misc.h misc.c
 			clang -c -o lf_stack.o stack.c -fsanitize=fuzzer-no-link,undefined,address,integer
 
+lf_container.o:		container.c container.h
+			clang -c -o lf_container.o container.c -fsanitize=fuzzer-no-link,undefined,address,integer
+
 lf_misc.o:		misc.h misc.c
 			clang -c -o lf_misc.o misc.c -fsanitize=fuzzer-no-link,undefined,address,integer
 
