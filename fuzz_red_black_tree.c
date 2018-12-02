@@ -243,10 +243,12 @@ int main() {
   clock_t start, current;
   start = clock();
   current = clock();
+  double diff = 0;
   i = 0;
-  while (((double)(current-start) / (double)CLOCKS_PER_SEC) < TIMEOUT) {
-    printf("TIME: %d", (int)((double)(current-start)/(double)CLOCKS_PER_SEC));
+  while (diff < (double)TIMEOUT) {
     current = clock();
+    diff = ((double)current-(double)start)/(double)CLOCKS_PER_SEC;
+    printf("diff=%lf\n", diff);
     fuzzit();
     i++;
   }
