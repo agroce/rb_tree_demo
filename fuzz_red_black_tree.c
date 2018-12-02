@@ -8,7 +8,7 @@
 
 #define META_REPS 5000
 #define FUZZ_REPS 1000
-#define TIMEOUT 10
+#define TIMEOUT 300
 
 /*  this file has functions to test a red-black tree of integers */
 
@@ -250,9 +250,6 @@ int main() {
     diff = current-start;
     fuzzit();
     i++;
-    if ((i % 10) == 0) {
-      printf ("elapsed = %lf\n", diff);
-    }
   }
 
   printf ("Ran %d iterations\n", i);  
