@@ -248,7 +248,6 @@ int main() {
   while (diff < (double)TIMEOUT) {
     current = clock();
     diff = ((double)current-(double)start)/(double)CLOCKS_PER_SEC;
-    printf("diff=%lf\n", diff);
     fuzzit();
     i++;
   }
