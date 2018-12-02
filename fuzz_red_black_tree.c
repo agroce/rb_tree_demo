@@ -240,16 +240,19 @@ int main() {
   } 
   */
 
-  clock_t start, current;
-  start = clock();
-  current = clock();
+  long start, current;
+  start = (long)time();
+  current = (long)time();
   double diff = 0;
   i = 0;
-  while (diff < (double)TIMEOUT) {
-    current = clock();
-    diff = ((double)current-(double)start)/(double)CLOCKS_PER_SEC;
+  while (diff < (long)TIMEOUT) {
+    current = (long)time();
+    diff = current-start;
     fuzzit();
     i++;
+    if ((i % 10) == 0) {
+      printf ("elapsed = %lf\n", diff);
+    }
   }
 
   printf ("Ran %d iterations\n", i);  
