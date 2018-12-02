@@ -6,9 +6,9 @@
 #include <stdint.h>
 #include "container.h"
 
-#define META_REPS 1000
+#define META_REPS 5000
 #define FUZZ_REPS 1000
-
+#define TIMEOUT 300
 
 /*  this file has functions to test a red-black tree of integers */
 
@@ -234,10 +234,19 @@ int main() {
 
   srand (time(NULL));
 
+  /* John's old code, runs for a number of iterations
   for (i=0; i<META_REPS; i++) {
     fuzzit();
-  }
+  } 
+  */
 
+  clock_t start, current;
+  start = clock();
+  current = clock();
+  while (((double)(current-start) / CLOCKS_PER_SEC) < TIMEOUT) {
+    fuzzit();
+  }
+  
   printf ("Done fuzzing\n");
   return 0;
 }
