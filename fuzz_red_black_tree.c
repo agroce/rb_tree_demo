@@ -241,12 +241,12 @@ int main() {
   */
 
   long start, current;
-  start = (long)time();
-  current = (long)time();
+  start = (long)time(NULL);
+  current = (long)time(NULL);
   double diff = 0;
   i = 0;
   while (diff < (long)TIMEOUT) {
-    current = (long)time();
+    current = (long)time(NULL);
     diff = current-start;
     fuzzit();
     i++;
