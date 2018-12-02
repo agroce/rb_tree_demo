@@ -8,7 +8,7 @@
 
 #define META_REPS 5000
 #define FUZZ_REPS 1000
-#define TIMEOUT 300
+#define TIMEOUT 60
 
 /*  this file has functions to test a red-black tree of integers */
 
