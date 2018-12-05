@@ -43,6 +43,17 @@ void *voidP() {
 
 bool noDuplicates;
 
+bool restrictValues;
+int valueRange;
+
+int GetValue() {
+  if (!restrictValues) {
+    return DeepState_Int();
+  } else {
+    return DeepState_IntInRange(0, valueRange);
+  }
+}
+
 int idx;
 
 void InorderTreeVerify(rb_red_blk_tree* tree, rb_red_blk_node* x) {
@@ -64,7 +75,6 @@ void RBTreeVerify(rb_red_blk_tree* tree) {
   ASSERT(idx == -1) << "idx should be -1!";
 }
 
-
 TEST(RBTree, GeneralFuzzer) {
   rb_red_blk_node* node;
   
@@ -75,11 +85,17 @@ TEST(RBTree, GeneralFuzzer) {
   if (noDuplicates) {
     LOG(INFO) << "No duplicates allowed.";
   }
+
+  restrictValues = DeepState_Bool();
+  if (restrictValues) {
+    valueRange = DeepState_IntInRange(1, LENGTH+1);
+    LOG(INFO) << "Restricting range of values to 0..." << valueRange;
+  }
   
   for (int n = 0; n < LENGTH; n++) {
     OneOf(
 	  [&] {
-	    int key = DeepState_Int();
+	    int key = GetValue();
 	    int* ip = (int*)malloc(sizeof(int));
 	    *ip = key;
 	    if (!noDuplicates || !containerFind(*ip)) {
@@ -93,7 +109,7 @@ TEST(RBTree, GeneralFuzzer) {
 	    }
 	  },
 	  [&] {
-	    int key = DeepState_Int();
+	    int key = GetValue();
 	    LOG(INFO) << n << ": FIND:" << key;
 	    if ((node = RBExactQuery(tree, &key))) {
 	      ASSERT(containerFind(key)) << "Expected to find " << key;
@@ -102,7 +118,7 @@ TEST(RBTree, GeneralFuzzer) {
 	    }
 	  },
 	  [&] {
-	    int key = DeepState_Int();
+	    int key = GetValue();
 	    LOG(INFO) << n << ": DELETE:" << key;
 	    if ((node = RBExactQuery(tree, &key))) {
 	      ASSERT(containerFind(key)) << "Expected to find " << key;
@@ -113,7 +129,7 @@ TEST(RBTree, GeneralFuzzer) {
 	    }
 	  },
 	  [&] {
-	    int key1 = DeepState_Int();	    
+	    int key1 = GetValue();	    
 	    int res, key2;
 	    LOG(INFO) << n << ": PRED:" << key1;
 	    res = containerPred(key1, &key2);
@@ -133,7 +149,7 @@ TEST(RBTree, GeneralFuzzer) {
 	    }
 	  },
 	  [&] {
-	    int key1 = DeepState_Int();	    
+	    int key1 = GetValue();	    
 	    int res, key2;
 	    LOG(INFO) << n << ": SUCC:" << key1;
 	    res = containerSucc(key1, &key2);
@@ -154,8 +170,8 @@ TEST(RBTree, GeneralFuzzer) {
 	  },
 	  [&] {
 	    int i;
-	    int key1 = DeepState_Int();
-	    int key2 = DeepState_Int();
+	    int key1 = GetValue();
+	    int key2 = GetValue();
 	    i = containerStartVal(key1, key2);
 	    stk_stack *enumResult = RBEnumerate(tree, &key1, &key2);	  
 	    while ((node = (rb_red_blk_node *)StackPop(enumResult))) {
