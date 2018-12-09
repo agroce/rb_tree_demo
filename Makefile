@@ -45,10 +45,10 @@ $(PROGRAM2): 	$(OBJS2)
 		$(CC) $(CFLAGS) $(OBJS2) -o $(PROGRAM2) $(DMALLOC_LIB)
 
 $(DS1): 	$(OBJSDS) deepstate_harness.cpp
-		clang++ $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate -fsanitize=undefined,integer,address
+		clang++ -std=c++14 $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate -fsanitize=undefined,integer,address
 
 $(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
-		clang++ $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
+		clang++ -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
 
 mem_check:	
 		@if [ -e makefile.txt ] ; then \
