@@ -55,7 +55,11 @@ static int compar (const void *a, const void *b)
 {
   int ai = ((struct elt_t *) a)->val;
   int bi = ((struct elt_t *) b)->val;
-  return ai - bi;
+  if (ai > bi)
+    return 1;
+  if (ai < bi)
+    return -1;
+  return 0;
 }
 
 void containerSort (void)
