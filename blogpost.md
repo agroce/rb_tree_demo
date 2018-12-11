@@ -37,3 +37,15 @@ AFL and other general-purpose fuzzers usually provide this kind of functionality
 ## Enter DeepState
 
 That is precisely what [DeepState](https://github.com/trailofbits/deepstate) is.
+
+### Installing DeepState
+
+### Using the DeepState Red-Black Tree Fuzzer
+
+## Mutation Testing
+
+### "There ain't no such thing as a free lunch"
+
+DeepState's native fuzzer is, for a given amount of time, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a bytestream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
+
+libFuzzer is even slower; in addition to all the services (except forking for crashes, which is handled by libFuzzer itself) provided by the DeepState fuzzer, libFuzzer is determining the code coverage of every test, and performing computations needed to base future testing on past coverage results.
