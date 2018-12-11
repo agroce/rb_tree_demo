@@ -1,4 +1,4 @@
-# Fuzzing an ADT with DeepState
+# Fuzzing an API with DeepState
 
 In 2013, John Regehr wrote a blog post on ["How to Fuzz an ADT Implementation."](https://blog.regehr.org/archives/896)  John talked at some length about general issues in gaining confidence that a data-type implementation is reliable, discussing code coverage, test oracles, and differential testing.  The article is well worth reading (it would be a good idea to read it before reading the rest of this article, in fact), and it gives a good overview of how to construct a simple custom fuzzer for an ADT, or, for that matter, any fairly self-contained API where there are good ways to check for correctness.
 
