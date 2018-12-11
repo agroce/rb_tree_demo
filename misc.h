@@ -20,6 +20,8 @@
 /*                names beginning with "g".  An example of a global */
 /*                variable name is gNewtonsConstant. */
 
+#define MALLOC_LIMIT 4000000000
+
 void Assert(int assertion, char* error);
 void * SafeMalloc(size_t size);
 

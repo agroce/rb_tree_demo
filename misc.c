@@ -41,8 +41,17 @@ void Assert(int assertion, char* error) {
 /**/
 /***********************************************************************/
 
+unsigned malloc_total = 0;
+
 void * SafeMalloc(size_t size) {
+  
   void * result;
+
+  malloc_total += size;
+
+  if (malloc_total > MALLOC_LIMIT) {
+    return(0);
+  }
 
   if ( (result = malloc(size)) ) { /* assignment intentional */
     return(result);
