@@ -20,10 +20,11 @@ switch (choice):
     foo_result = foo(randomInt(), randomString());
     break;
   choose_bar:
-	bar_result = bar(foo_result, randomString();
+    bar_result = bar(foo_result, randomString();
     break;
   choose_baz:
-    baz_result = baz(foo_result, bar_result);	
+    baz_result = baz(foo_result, bar_result);
+    break;  
 checkInvariants();
 ```
 
