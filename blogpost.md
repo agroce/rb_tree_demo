@@ -14,11 +14,16 @@ That is, the tests each are of the form: "do something, then check that it did t
 
 ```
 foo_result = NULL;
+bar_result = NULL;
 switch (choice):
-  choose_foo:  foo_result = foo(randomInt(), randomString());
-                       break;
-  choose_bar:  r = bar(foo_result, randomString();
-                       break;
+  choose_foo:
+    foo_result = foo(randomInt(), randomString());
+    break;
+  choose_bar:
+	bar_result = bar(foo_result, randomString();
+    break;
+  choose_baz:
+    baz_result = baz(foo_result, bar_result);	
 checkInvariants();
 ```
 
