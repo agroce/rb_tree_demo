@@ -44,6 +44,8 @@ That is precisely what [DeepState](https://github.com/trailofbits/deepstate) is.
 
 ## Mutation Testing
 
+The tool generates 2,602 mutants, but only 1,120 of these actually compile.  Analyzing those mutants with a test budget of 60 seconds, we can get a better idea of the quality of our fuzzing efforts.  The DeepState brute-force fuzzer kills 797 of these mutants (71.16%).  John's original fuzzer kills 822 (73.39%).  Fuzzing the mutants not killed by these fuzzers another 60 seconds doesn't kill any additional mutants.  The performance of libFuzzer is strikingly similar:  60 seconds of libFuzzer (starting from an empty corpus) kills 
+
 ### "There ain't no such thing as a free lunch"
 
 DeepState's native fuzzer is, for a given amount of time, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a bytestream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
