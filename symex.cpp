@@ -45,15 +45,62 @@ TEST(RBTree, TinySymex) {
   rb_red_blk_tree* tree = RBTreeCreate(IntComp, IntDest, InfoDest, IntPrint, InfoPrint);  
   containerCreate();
 
-  int key = DeepState_Int();
-  int* ip = (int*)malloc(sizeof(int));
-  *ip = key;
-  void* vp = voidP();
-  RBTreeInsert(tree, ip, vp);
+  int key;
+  int* ip;
+  void* vp;
 
   key = DeepState_Int();
   ip = (int*)malloc(sizeof(int));
   *ip = key;
   vp = voidP();
+  LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;  
   RBTreeInsert(tree, ip, vp);
+  containerInsert(*ip, vp);
+
+  key = DeepState_Int();
+  LOG(INFO) << n << ": DELETE:" << key;  
+  if ((node = RBExactQuery(tree, &key))) {
+    ASSERT(containerFind(key)) << "Expected to find " << key;
+    RBDelete(tree, node);
+    containerDelete(key);
+  } else {
+    ASSERT(!containerFind(key)) << "Expected not to find " << key;
+  }    
+  
+  key = DeepState_Int();
+  ip = (int*)malloc(sizeof(int));
+  *ip = key;
+  vp = voidP();
+  LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;  
+  RBTreeInsert(tree, ip, vp);
+  containerInsert(*ip, vp);
+
+  key = DeepState_Int();
+  LOG(INFO) << n << ": DELETE:" << key;  
+  if ((node = RBExactQuery(tree, &key))) {
+    ASSERT(containerFind(key)) << "Expected to find " << key;
+    RBDelete(tree, node);
+    containerDelete(key);
+  } else {
+    ASSERT(!containerFind(key)) << "Expected not to find " << key;
+  }    
+  
+  key = DeepState_Int();
+  ip = (int*)malloc(sizeof(int));
+  *ip = key;
+  vp = voidP();
+  LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;  
+  RBTreeInsert(tree, ip, vp);
+  containerInsert(*ip, vp);  
+
+  key = DeepState_Int();
+  LOG(INFO) << n << ": DELETE:" << key;  
+  if ((node = RBExactQuery(tree, &key))) {
+    ASSERT(containerFind(key)) << "Expected to find " << key;
+    RBDelete(tree, node);
+    containerDelete(key);
+  } else {
+    ASSERT(!containerFind(key)) << "Expected not to find " << key;
+  }      
+
 }
