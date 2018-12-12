@@ -243,16 +243,58 @@ Assertion failed: (left_black_cnt == right_black_cnt), function checkRepHelper, 
 ERROR: Crashed: RBTree_GeneralFuzzer
 ```
 
-We just need to insert three identical values into the tree to expose the failure.
+We just need to insert three identical values into the tree to expose the problem.  Remember to fix your `red_black_tree.c` before proceeding!
 
 ## Mutation Testing
 
+Introducing one bug by hand is fine, and we could try it again, but "the plural of anecdote is not data."  However, this is not strictly true.  If we have enough anecdotes, we can probably call it data (the field of "big multiple anecdotes" is due to take off any day now).  In software testing, creating multiple "fake bugs" has a name, _mutation testing_ (or _mutation analysis_).  Mutation testing works by automatically generating lots of small changes to a program, in the expectation that most such changes will make the program incorrect.  A test suite or fuzzer is better if it detects more of these changes.  There are many tools for mutation testing available, especially for Java.  The tools for C code are less robust, or more difficult to use, in general.  We recently released a tool, the [universalmutator](https://github.com/agroce/universalmutator), that uses regular expressions to allow mutation for many languages, including C and C++ (and Swift, Solidity, Rust, and numerous other languages previously without mutation testing tools).  We'll use the universalmutator to see how well our fuzzers do at detecting artificial red-black tree bugs.
+
+Installing universalmutator is easy:
+
+```shell
+pip install universalmutator
+mkdir mutants
+mutate red_black_tree.c --mutantDir mutants
+```
+
+This will generate a large number of mutants, most of which won't compile (the universalmutator doesn't parse, or "know" C, so it's no surprise many of its mutants are not valid C).  We can discover the compiling mutants by running "mutation analysis" on the mutants, with "does it compile?" as our "test":
+
+```shell
+analyze_mutants red_black_tree.c "make clean; make" --mutantDir mutants
+```
+
+This will produce two files, `killed.txt` containing mutants that don't compile, and `notkilled.txt` containing mutants that do compile.  To see if a mutant is killed, the analysis tool just determines whether the command in quotes returns a non-zero exit code, or times out (the default timeout is 30 seconds; unless you have a very slow machine, this is plenty of time to compile our code here).
+
+If we copy the `notkilled.txt` file containing valid (compiling) mutants to another file, we can then do some real mutation testing:
+
+```shell
+cp notkilled.txt compile.txt
+analyze_mutants red_black_tree.c "make clean; make fuzz_rb; ./fuzz_rb" --mutantDir mutants --verbose --timeout 120--fromFile compile.txt
+```
+
+Similar commands will run mutation testing on the DeepState fuzzer and libFuzzer.  Just change `make fuzz_rb; ./fuzz_rb` to `make ds_rb; ./ds_rb --fuzz --timeout 60 --log_level 3 --abort_on_fail` to use the built-in DeepState fuzzer.  For libFuzzer, to speed things up, we'll want to set the environment variable`LIBFUZZER_ABORT_ON_FAIL` to `TRUE`, and pipe output to `/dev/null` since libFuzzer's verbosity will hide our actual mutation results:
+
+```shell
+export LIBFUZZER_ABORT_ON_FAIL=TRUE
+analyze_mutants red_black_tree.c "make clean; make ds_rb_lf; ./ds_rb_lf -use_value_profile=1 -detect_leaks=0 -max_total_time=60 >& /dev/null" --mutantDir mutants --verbose --timeout 120 --fromFile compile.txt
+```
+
 The tool generates 2,602 mutants, but only 1,120 of these actually compile.  Analyzing those mutants with a test budget of 60 seconds, we can get a better idea of the quality of our fuzzing efforts.  The DeepState brute-force fuzzer kills 797 of these mutants (71.16%).  John's original fuzzer kills 822 (73.39%).  Fuzzing the mutants not killed by these fuzzers another 60 seconds doesn't kill any additional mutants.  The performance of libFuzzer is strikingly similar:  60 seconds of libFuzzer (starting from an empty corpus) kills 797 mutants, exactly the same as the brute force fuzzer -- the same mutants, in fact.
 
-### "There ain't no such thing as a free lunch" -- in the short run
+### "There ain't no such thing as a free lunch" (or is there?)
 
-DeepState's native fuzzer is, for a given amount of time, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a bytestream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
+DeepState's native fuzzer is, for a given amount of time, it appears, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a bytestream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
 
 libFuzzer is even slower; in addition to all the services (except forking for crashes, which is handled by libFuzzer itself) provided by the DeepState fuzzer, libFuzzer is determining the code coverage and computing value profiles for every test, and performing computations needed to base future testing on those evaluations of input quality.
 
-## Symbolic Execution
+Is this why John's fuzzer kills 25 mutants that DeepState does not?  Well, not quite.  If we examine the 25 additional mutants, we discover that every one involves changing an equality comparison on a pointer into an inequality.  E.g.:
+
+```
+<   if ( (y == tree->root) ||
+---
+>   if ( (y <= tree->root) ||
+```
+
+The DeepState fuzzer is not finding these because it runs each test in a fork, and so the address space doesn't allocate enough times to cause a problem for these particular checks!  Now, in theory, this shouldn't be the case for libFuzzer, which runs without forking.  And, sure enough, if we give the slow-and-steady tortoise libFuzzer 5 minutes instead of 60 seconds, it catches all of these mutants, too.  No amount of additional fuzzing will help the DeepState fuzzer.  In this case, the bug is strange enough and unlikely enough we can perhaps ignore it.  The issue is not the speed of our fuzzer, or its quality, but the fact that different fuzzing environments create subtle differences in _what tests we are actually running_.
+
+This takes care of the differences in our fuzzer's performances.  But how about the remaining mutants?  None of them are killed by 300 seconds of fuzzing using any of our fuzzers.  Do they show holes in our testing?  There are various ways to detect _equivalent_ mutants (mutants that don't actually change the program semantics, and so can't possibly be killed), including comparing the binaries generated by an optimizing compiler.  For our purposes, we will just examine a sample of the unkilled mutants, to confirm that at least most of the unkilled mutants are genuinely uninteresting.
