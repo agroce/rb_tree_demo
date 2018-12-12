@@ -38,6 +38,19 @@ AFL and other general-purpose fuzzers usually provide this kind of functionality
 
 That is precisely what [DeepState](https://github.com/trailofbits/deepstate) is.  Well, actually, DeepState also lets you use symbolic execution to generate inputs, but we'll come back to that, later.
 
+Translating John's fuzzer into DeepState is relatively easy.  [Here is a DeepState version of "the same fuzzer."](https://github.com/agroce/rb_tree_demo)  The primary changes for DeepState are:
+
+- Remove `main` and replace it with a named test (`TEST(RBTree, GeneralFuzzer)`)
+
+- Rather than looping over creation of a red-black tree, just create one tree in each test
+   - DeepState will handle running multiple tests
+
+- Replace various `rand() % NNN` calls with `DeepState_Int()` and `DeepState_IntInRange(...)` calls
+
+- Replace the `switch` statement choosing what API call to make with DeepState's `Oneof` construct
+
+There are a number of other cosmetic (e.g. formatting, variable naming) changes, but the essence of the fuzzer is clearly preserved here.
+
 ### Installing DeepState
 
 ### Using the DeepState Red-Black Tree Fuzzer
