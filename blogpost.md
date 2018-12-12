@@ -56,7 +56,8 @@ There are a number of other cosmetic (e.g. formatting, variable naming) changes,
 
 ### Installing DeepState
 
-The [DeepState GitHub repository](https://github.com/trailofbits/deepstate) provides more details and dependencies, but on my Macbook Pro, installation is simple:
+The [DeepState GitHub repository](https://github.com/trailofbits/deepstate) provides more details and dependencies, but on my MacBook Pro, installation is simple:
+
 ```shell
 git clone https://github.com/trailofbits/deepstate
 cd deepstate
@@ -67,6 +68,7 @@ sudo make install
 ```
 
 Building a version with libFuzzer enabled is slightly more involved:
+
 ```shell
 brew install llvm@6
 git clone https://github.com/trailofbits/deepstate
@@ -87,7 +89,7 @@ cd rb_tree_demo
 make
 ```
 
-If you are on a Mac and using a non-Apple clang to get libFuzzer support, change `CC` and `CXX` in the Makefile to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
+If you are on a Mac and using a non-Apple clang in order to get libFuzzer support, change `CC` and `CXX` in the Makefile to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
 
 This will give you a few different executables of interest.  One, `fuzz_rb` is simply John's fuzzer, modified to use a 60 second timeout instead of a fixed number of "meta-iterations."  The `ds_rb` executable is the DeepState executable.  You can fuzz the red-black tree using a simple brute-force fuzzer (that behaves very much like John's original fuzzer):
 
