@@ -44,13 +44,17 @@ Translating John's fuzzer into a DeepState test is relatively easy.  [Here is a 
    - A DeepState file can contain more than one named test, though it is fine to only have one test
 
 - Rather than looping over creation of a red-black tree, just create one tree in each test
-   - DeepState will handle running multiple tests
+   - Instead of a fuzzing loop, our tests are closer to very generalized unit tests:  each test does one sequence of interesting API calls
+   - DeepState will handle running multiple tests; the fuzzer or symbolic execution engine will provide the "outer loop"
 
 - Replace various `rand() % NNN` calls with `DeepState_Int()`, `DeepState_Char()` and `DeepState_IntInRange(...)` calls
    - DeepState provides calls to generate most of the basic data types you want, optionally over restricted ranges
+   - Using `rand()` in DeepState will create a nondeterministic test of little value; let DeepState make `random` choices for you
 
 - Replace the `switch` statement choosing what API call to make with DeepState's `Oneof` construct
-   - This is not strictly neccessary, but simplifies the code and allows optimization of choices and smart test reduction
+   - `OneOf` takes a list of C++ lambdas, and chooses one to execute 
+   - This change is not strictly required, but using `OneOf` simplifies the code and allows optimization of choices and smart test reduction
+   - Another version of `Oneof` takes a fixed-size array as input, and returns some value in it; e.g., `OneOf("abcd")` will produce a char, either `a`, `b`, `c`, or `d`
 
 There are a number of other cosmetic (e.g. formatting, variable naming) changes, but the essence of the fuzzer is clearly preserved here.  With these changes, the fuzzer works almost as before, except that instead of running the `fuzz_rb` executable, we'll use DeepState to run the test we've defined and generate input values that choose which function calls to make, what values to insert in the red-black tree, and all the other decisions represented by our `DeepState_Int`, `OneOf` and other calls.
 
