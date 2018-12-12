@@ -38,22 +38,56 @@ AFL and other general-purpose fuzzers usually provide this kind of functionality
 
 That is precisely what [DeepState](https://github.com/trailofbits/deepstate) is.  Well, actually, DeepState also lets you use symbolic execution to generate inputs, but we'll come back to that, later.
 
-Translating John's fuzzer into DeepState is relatively easy.  [Here is a DeepState version of "the same fuzzer."](https://github.com/agroce/rb_tree_demo)  The primary changes for DeepState are:
+Translating John's fuzzer into a DeepState test is relatively easy.  [Here is a DeepState version of "the same fuzzer."](https://github.com/agroce/rb_tree_demo)  The primary changes for DeepState are:
 
 - Remove `main` and replace it with a named test (`TEST(RBTree, GeneralFuzzer)`)
+   - A DeepState file can contain more than one named test, though it is fine to only have one test
 
 - Rather than looping over creation of a red-black tree, just create one tree in each test
    - DeepState will handle running multiple tests
 
-- Replace various `rand() % NNN` calls with `DeepState_Int()` and `DeepState_IntInRange(...)` calls
+- Replace various `rand() % NNN` calls with `DeepState_Int()`, `DeepState_Char()` and `DeepState_IntInRange(...)` calls
+   - DeepState provides calls to generate most of the basic data types you want, optionally over restricted ranges
 
 - Replace the `switch` statement choosing what API call to make with DeepState's `Oneof` construct
+   - This is not strictly neccessary, but simplifies the code and allows optimization of choices and smart test reduction
 
-There are a number of other cosmetic (e.g. formatting, variable naming) changes, but the essence of the fuzzer is clearly preserved here.
+There are a number of other cosmetic (e.g. formatting, variable naming) changes, but the essence of the fuzzer is clearly preserved here.  With these changes, the fuzzer works almost as before, except that instead of running the `fuzz_rb` executable, we'll use DeepState to run the test we've defined and generate input values that choose which function calls to make, what values to insert in the red-black tree, and all the other decisions represented by our `DeepState_Int`, `OneOf` and other calls.
 
 ### Installing DeepState
 
+The [DeepState GitHub repository](https://github.com/trailofbits/deepstate) provides more details and dependencies, but on my Macbook Pro, installation is simple:
+```
+git clone https://github.com/trailofbits/deepstate
+cd deepstate
+mkdir build
+cd build
+cmake ..
+sudo make install
+```
+
+Building a version with libFuzzer enabled is slightly more involved:
+```
+brew install llvm@6
+git clone https://github.com/trailofbits/deepstate
+cd deepstate
+mkdir build
+cd build
+CC=/usr/local/opt/llvm\@6/bin/clang CXX=/usr/local/opt/llvm\@6/bin/clang++ BUILD_LIBFUZZER=TRUE cmake ..
+sudo make install
+```
+
 ### Using the DeepState Red-Black Tree Fuzzer
+
+Once you have installed DeepState, building the red-black tree fuzzer is simple:
+
+```
+git clone https://github.com/agroce/rb_tree_demo
+cd rb_tree_demo
+make
+```
+
+If you are on a Mac and using a non-Apple clang to get libFuzzer support, change the compilers in the Makefile to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
 
 ## Mutation Testing
 
