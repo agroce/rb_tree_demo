@@ -50,4 +50,4 @@ The tool generates 2,602 mutants, but only 1,120 of these actually compile.  Ana
 
 DeepState's native fuzzer is, for a given amount of time, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a bytestream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
 
-libFuzzer is even slower; in addition to all the services (except forking for crashes, which is handled by libFuzzer itself) provided by the DeepState fuzzer, libFuzzer is determining the code coverage of every test, and performing computations needed to base future testing on past coverage results.
+libFuzzer is even slower; in addition to all the services (except forking for crashes, which is handled by libFuzzer itself) provided by the DeepState fuzzer, libFuzzer is determining the code coverage and computing value profiles for every test, and performing computations needed to base future testing on those evaluations of input quality.
