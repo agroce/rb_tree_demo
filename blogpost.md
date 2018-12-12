@@ -57,7 +57,7 @@ There are a number of other cosmetic (e.g. formatting, variable naming) changes,
 ### Installing DeepState
 
 The [DeepState GitHub repository](https://github.com/trailofbits/deepstate) provides more details and dependencies, but on my Macbook Pro, installation is simple:
-```
+```shell
 git clone https://github.com/trailofbits/deepstate
 cd deepstate
 mkdir build
@@ -67,7 +67,7 @@ sudo make install
 ```
 
 Building a version with libFuzzer enabled is slightly more involved:
-```
+```shell
 brew install llvm@6
 git clone https://github.com/trailofbits/deepstate
 cd deepstate
@@ -79,15 +79,47 @@ sudo make install
 
 ### Using the DeepState Red-Black Tree Fuzzer
 
-Once you have installed DeepState, building the red-black tree fuzzer is simple:
+Once you have installed DeepState, building the red-black tree fuzzer(s) is simple:
 
-```
+```shell
 git clone https://github.com/agroce/rb_tree_demo
 cd rb_tree_demo
 make
 ```
 
-If you are on a Mac and using a non-Apple clang to get libFuzzer support, change the compilers in the Makefile to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
+If you are on a Mac and using a non-Apple clang to get libFuzzer support, change `CC` and `CXX` in the Makefile to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
+
+This will give you a few different executables of interest.  One, `fuzz_rb` is simply John's fuzzer, modified to use a 60 second timeout instead of a fixed number of "meta-iterations."  The `ds_rb` executable is the DeepState executable.  You can fuzz the red-black tree using a simple brute-force fuzzer (that behaves very much like John's original fuzzer):
+
+```shell
+mkdir tests
+./ds_rb --fuzz --timeout 60 --log_level 3 --output_test_dir tests
+```
+
+If you leave out the `log_level` specification, you can see all the tests DeepState generates and runs.  The `tests` directory should be empty at the termination of fuzzing, since the red-black tree code in the repo (to my knowledge) has no bugs.  If you add `--fuzz_save_passing` to the options, you will end up with a large number of files for passing tests in the directory.
+
+Finally, we can use libFuzzer to generate tests.
+```shell
+mkdir corpus
+./ds_rb_lf corpus -use_value_profile=1 -detect_leaks=0 -max_total_time=60
+```
+
+This will run libFuzzer for 60 seconds, and place any interesting inputs (including test failures) in the corpus directory.  If there is a crash, it will leave a `crash-` file in the current directory.
+
+We can replay any DeepState-generated tests (from libFuzzer or DeepState's fuzzer) easily:
+
+```shell
+./ds_rb --input_test_file <file>
+```
+
+Or replay an entire directory of tests:
+```shell
+./ds_rb --input_test_files_dir <dir>
+```
+
+Adding a `-abort_on_fail` flag when replaying an entire directory lets you stop the testing as soon as you hit a failing or crashing test.
+
+### Adding a Bug
 
 ## Mutation Testing
 
@@ -98,3 +130,5 @@ The tool generates 2,602 mutants, but only 1,120 of these actually compile.  Ana
 DeepState's native fuzzer is, for a given amount of time, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a bytestream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
 
 libFuzzer is even slower; in addition to all the services (except forking for crashes, which is handled by libFuzzer itself) provided by the DeepState fuzzer, libFuzzer is determining the code coverage and computing value profiles for every test, and performing computations needed to base future testing on those evaluations of input quality.
+
+## Symbolic Execution
