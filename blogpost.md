@@ -81,7 +81,7 @@ sudo make install
 
 ### Using the DeepState Red-Black Tree Fuzzer
 
-Once you have installed DeepState, building the red-black tree fuzzer(s) is simple:
+Once you have installed DeepState, building the red-black tree fuzzer(s) is also simple:
 
 ```shell
 git clone https://github.com/agroce/rb_tree_demo
@@ -122,6 +122,124 @@ Or replay an entire directory of tests:
 Adding a `-abort_on_fail` flag when replaying an entire directory lets you stop the testing as soon as you hit a failing or crashing test.
 
 ### Adding a Bug
+
+This is all fine, but it doesn't (or at least shouldn't) give us much confidence in John's fuzzer or in DeepState.  Even if we changed the Makefile to let us see code coverage, it would be easy to write a fuzzer that doesn't actually check for correct behavior -- it covers everything, but doesn't find any bugs other than crashes.  To see the fuzzers in action (and see more of what DeepState gives us), we can add a moderately subtle bug.  Go to line 267 of `red_black_tree.c` and change the 1 to a 0.  The diff of the new file and the original should look like:
+
+```
+267c267
+< 	x->parent->parent->red=0;
+---
+> 	x->parent->parent->red=1;
+```
+
+Do a `make` to rebuild all the fuzzer with the new, broken `red_black_tree.c`.
+
+Running the original fuzzer will fail almost immediately:
+
+```
+time ./fuzz_rb
+Assertion failed: (left_black_cnt == right_black_cnt), function checkRepHelper, file red_black_tree.c, line 702.
+Abort trap: 6
+
+real	0m0.100s
+user	0m0.008s
+sys	0m0.070s
+```
+
+Using the DeepState fuzzer will produce results almost as quickly (we'll let it show us the testing by leaving off the `--log_level` option, but telling it to stop as soon as it finds a failing test):
+
+```
+time ./ds_rb --fuzz --abort_on_fail --output_test_dir tests
+INFO: Starting fuzzing
+INFO: No test specified, defaulting to last test defined
+INFO: Running: RBTree_GeneralFuzzer from deepstate_harness.cpp(78)
+INFO: deepstate_harness.cpp(122): 0: DELETE:-747598508
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(122): 1: DELETE:831257296
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(134): 2: PRED:1291220586
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(154): 4: SUCC:-1845067087
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(113): 6: FIND:-427918646
+INFO: deepstate_harness.cpp(190): checkRep...
+...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(103): 44: INSERT:-1835066397 0x00000000ffffff9c
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(154): 46: SUCC:-244966140
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(103): 48: INSERT:1679127713 0x00000000ffffffa4
+INFO: deepstate_harness.cpp(190): checkRep...
+Assertion failed: (left_black_cnt == right_black_cnt), function checkRepHelper, file red_black_tree.c, line 702.
+ERROR: Crashed: RBTree_GeneralFuzzer
+INFO: Saved test case to file `tests/6de8b2ffd42af6878875833c0cbfa9ea09617285.crash`
+...
+real	0m0.148s
+user	0m0.011s
+sys	0m0.131s
+```
+
+I've omitted much of the output above, since showing all 49 steps before the detection of the problem is a bit much, and the details of your output will certainly vary.  The big difference, besides the verbose output, from John's fuzzer, is (1) you may find a different assertion violation and (2) the fact that DeepState _saved a test case_.  The name of your saved test case will, of course, be different, since the names are uniquely generated for each saved test.  To replay the test, I would do this:
+
+```shell
+./ds_rb --input_test_file tests/6de8b2ffd42af6878875833c0cbfa9ea09617285.crash
+```
+
+and I would get to see the whole disaster again, in gory detail.  As we said above, this isn't the most helpful output for seeing what's going on.  DeepState can help us here:
+
+```
+deepstate-reduce ./ds_rb tests/6de8b2ffd42af6878875833c0cbfa9ea09617285.crash minimized.crash 
+ORIGINAL TEST HAS 8192 BYTES
+LAST BYTE READ IS 509
+SHRINKING TO IGNORE UNREAD BYTES
+ONEOF REMOVAL REDUCED TEST TO 502 BYTES
+ONEOF REMOVAL REDUCED TEST TO 494 BYTES
+...
+ONEOF REMOVAL REDUCED TEST TO 18 BYTES
+ONEOF REMOVAL REDUCED TEST TO 2 BYTES
+BYTE RANGE REMOVAL REDUCED TEST TO 1 BYTES
+BYTE REDUCTION: BYTE 0 FROM 168 TO 0
+NO (MORE) REDUCTIONS FOUND
+PADDING TEST WITH 49 ZEROS
+
+WRITING REDUCED TEST WITH 50 BYTES TO minimized.crash
+```
+
+Again, we omit some of the lengthy process of reducing the test.  The new test is easier to understand:
+
+```
+./ds_rb --input_test_file minimzed.crash
+INFO: No test specified, defaulting to first test
+INFO: Initialized test input buffer with data from `minimized.crash`
+INFO: Running: RBTree_GeneralFuzzer from deepstate_harness.cpp(78)
+INFO: deepstate_harness.cpp(103): 0: INSERT:0 0x0000000000000000
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(103): 1: INSERT:0 0x0000000000000000
+INFO: deepstate_harness.cpp(190): checkRep...
+INFO: deepstate_harness.cpp(192): RBTreeVerify...
+INFO: deepstate_harness.cpp(103): 2: INSERT:0 0x0000000000000000
+INFO: deepstate_harness.cpp(190): checkRep...
+Assertion failed: (left_black_cnt == right_black_cnt), function checkRepHelper, file red_black_tree.c, line 702.
+ERROR: Crashed: RBTree_GeneralFuzzer
+```
+
+We just need to insert three identical values into the tree to expose the failure.
 
 ## Mutation Testing
 
