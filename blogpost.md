@@ -123,7 +123,7 @@ Or replay an entire directory of tests:
 ./ds_rb --input_test_files_dir <dir>
 ```
 
-Adding a `-abort_on_fail` flag when replaying an entire directory lets you stop the testing as soon as you hit a failing or crashing test.
+Adding a `-abort_on_fail` flag when replaying an entire directory lets you stop the testing as soon as you hit a failing or crashing test.  This approach can easily be used to add failures found with DeepState (or interesting passing tests, or perhaps corpus tests from libFuzzer) to automatic regression tests for a project, including in CI.
 
 ### Adding a Bug
 
@@ -247,7 +247,7 @@ We just need to insert three identical values into the tree to expose the proble
 
 ## Mutation Testing
 
-Introducing one bug by hand is fine, and we could try it again, but "the plural of anecdote is not data."  However, this is not strictly true.  If we have enough anecdotes, we can probably call it data (the field of "big multiple anecdotes" is due to take off any day now).  In software testing, creating multiple "fake bugs" has a name, _mutation testing_ (or _mutation analysis_).  Mutation testing works by automatically generating lots of small changes to a program, in the expectation that most such changes will make the program incorrect.  A test suite or fuzzer is better if it detects more of these changes.  There are many tools for mutation testing available, especially for Java.  The tools for C code are less robust, or more difficult to use, in general.  We recently released a tool, the [universalmutator](https://github.com/agroce/universalmutator), that uses regular expressions to allow mutation for many languages, including C and C++ (and Swift, Solidity, Rust, and numerous other languages previously without mutation testing tools).  We'll use the universalmutator to see how well our fuzzers do at detecting artificial red-black tree bugs.
+Introducing one bug by hand is fine, and we could try it again, but "the plural of anecdote is not data."  However, this is not strictly true.  If we have enough anecdotes, we can probably call it data (the field of "big multiple anecdotes" is due to take off any day now).  In software testing, creating multiple "fake bugs" has a name, _mutation testing_ (or _mutation analysis_).  Mutation testing works by automatically generating lots of small changes to a program, in the expectation that most such changes will make the program incorrect.  A test suite or fuzzer is better if it detects more of these changes.  There are many tools for mutation testing available, especially for Java.  The tools for C code are less robust, or more difficult to use, in general.  We recently released a tool, the [universalmutator](https://github.com/agroce/universalmutator), that uses regular expressions to allow mutation for many languages, including C and C++ (and Swift, Solidity, Rust, and numerous other languages previously without mutation testing tools).  We'll use the universalmutator to see how well our fuzzers do at detecting artificial red-black tree bugs.  Besides generality, one advantage of universalmutator is that it produces lots of mutants, including ones that are likely equivalent but can produce very subtle bugs, that are not supported in most mutation systems.  For high-stakes software, this can be worth the additional effort in analyzing and examining the mutants.
 
 Installing universalmutator and generating some mutants is easy:
 
@@ -312,7 +312,9 @@ Is this why John's fuzzer kills 25 mutants that DeepState does not?  Well, not q
 >   if ( (y <= tree->root) ||
 ```
 
-The DeepState fuzzer is not finding these because it runs each test in a fork, and so the address space doesn't allocate enough times to cause a problem for these particular checks!  Now, in theory, this shouldn't be the case for libFuzzer, which runs without forking.  And, sure enough, if we give the slow-and-steady tortoise libFuzzer 5 minutes instead of 60 seconds, it catches all of these mutants, too.  No amount of additional fuzzing will help the DeepState fuzzer.  In this case, the bug is strange enough and unlikely enough we can perhaps ignore it.  The issue is not the speed of our fuzzer, or its quality, but the fact that different fuzzing environments create subtle differences in _what tests we are actually running_.
+The DeepState fuzzer is not finding these because it runs each test in a fork, and so the address space doesn't allocate enough times to cause a problem for these particular checks!  Now, in theory, this shouldn't be the case for libFuzzer, which runs without forking.  And, sure enough, if we give the slow-and-steady tortoise libFuzzer 5 minutes instead of 60 seconds, it catches all of these mutants, too.  No amount of additional fuzzing will help the DeepState fuzzer.  In this case, the bug is strange enough and unlikely enough we can perhaps ignore it.  The issue is not the speed of our fuzzer, or the quality (exactly), but the fact that different fuzzing environments create subtle differences in _what tests we are actually running_.
+
+Now that we've seen this problem, we'll add an option to DeepState to make the brute force fuzzer run in a [non-forking mode](https://github.com/trailofbits/deepstate/issues/90) (by the time you read this, the option may already exist).  Unfortunately, this is not a great solution overall:  while libFuzzer "detects" these bugs, it can't produce a good saved test case for them, since the failure depends on all the mallocs that have been issued, and the exact addresses of certain pointers.  Perhaps this bug is not really worth our trouble.  I think we can say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
 
 ### Examining the Mutants
 
@@ -357,3 +359,15 @@ If we were really testing this red-black tree as a critical piece of code, we wo
 - Make a tool to throw out all mutants inside comments, inside the `InorderTreePrint` function, or that remove an assertion.
 
 - Examine the remaining mutants (maybe 200 or so) carefully, to make sure we're not missing anything.
+
+The process of (1) making a test generator then (2) applying mutation testing and (3) actually looking at the surviving mutants and using them to improve our testing can be thought of as a [_falsification-driven testing_ process](https://agroce.github.io/asej18.pdf).  For highly-critical, small pieces of code, this can be a very effective way to build an effective fuzzing regimen.
+
+## Further Reading
+
+For a more invovled example using DeepState to test an API, see the [TestFs](https://github.com/agroce/testfs) example, which tests a user-level, ext3-like file system.  For more details on DeepState, see our [NDSS 2018 Binary Analysis Research Workshop paper](https://agroce.github.io/bar18.pdf).
+
+## Appendix: Symbolic Execution
+
+DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the red-black tree or file system examples, even if we reduce the test length to something very short, like 3 or 4 steps.  The `symex.cpp` file, however, is a simple test that these engines can handle.  See the DeepState documentation for how to use symbolic execution.  Note that you'll want to compile `symex.cpp` and the C files for the red-black tree all without various sanitizers, to make life easy for the binary analysis tools.
+
+
