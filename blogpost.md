@@ -364,7 +364,7 @@ The process of (1) making a test generator then (2) applying mutation testing an
 
 ## Further Reading
 
-For a more invovled example using DeepState to test an API, see the [TestFs](https://github.com/agroce/testfs) example, which tests a user-level, ext3-like file system.  For more details on DeepState, see our [NDSS 2018 Binary Analysis Research Workshop paper](https://agroce.github.io/bar18.pdf).
+For a more involved example using DeepState to test an API, see the [TestFs](https://github.com/agroce/testfs) example, which tests a user-level, ext3-like file system.  For more details on DeepState, see our [NDSS 2018 Binary Analysis Research Workshop paper](https://agroce.github.io/bar18.pdf).
 
 ## Appendix: Symbolic Execution
 
