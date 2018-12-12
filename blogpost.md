@@ -249,7 +249,7 @@ We just need to insert three identical values into the tree to expose the proble
 
 Introducing one bug by hand is fine, and we could try it again, but "the plural of anecdote is not data."  However, this is not strictly true.  If we have enough anecdotes, we can probably call it data (the field of "big multiple anecdotes" is due to take off any day now).  In software testing, creating multiple "fake bugs" has a name, _mutation testing_ (or _mutation analysis_).  Mutation testing works by automatically generating lots of small changes to a program, in the expectation that most such changes will make the program incorrect.  A test suite or fuzzer is better if it detects more of these changes.  There are many tools for mutation testing available, especially for Java.  The tools for C code are less robust, or more difficult to use, in general.  We recently released a tool, the [universalmutator](https://github.com/agroce/universalmutator), that uses regular expressions to allow mutation for many languages, including C and C++ (and Swift, Solidity, Rust, and numerous other languages previously without mutation testing tools).  We'll use the universalmutator to see how well our fuzzers do at detecting artificial red-black tree bugs.
 
-Installing universalmutator is easy:
+Installing universalmutator and generating some mutants is easy:
 
 ```shell
 pip install universalmutator
