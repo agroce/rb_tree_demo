@@ -369,7 +369,7 @@ The process of (1) making a test generator then (2) applying mutation testing an
 
 ## Just Fuzz it More
 
-Alternatively, before turning to mutant investigation, you can just fuzz the code more aggressively.  Our mutant sample suggests there won't be _many_ outstanding bugs, but perhaps there are a few.  Five minutes is not that extreme a fuzzing regimen; people expect to run AFL for days.  If we were really testing the red-black tree as a critical piece of code, we probably wouldn't give up after five minutes.  Which fuzzer would be best for this?  It's hard to know for sure, but one reasonable approach would be to first use libFuzzer to generate a large corpus of tests to seed fuzzing, that achieve high coverage on the un-mutated red-black tree.  Then, we can run a longer fuzzing run on each mutant, using the seeds to make sure we're not spending most of the time just "learning" the red-black tree API.
+Alternatively, before turning to mutant investigation, you can just fuzz the code more aggressively.  Our mutant sample suggests there won't be _many_ outstanding bugs, but perhaps there are a few.  Five minutes is not that extreme a fuzzing regimen; people expect to run AFL for days.  If we were really testing the red-black tree as a critical piece of code, we probably wouldn't give up after five minutes.  Which fuzzer would be best for this?  It's hard to know for sure, but one reasonable approach would be to first use libFuzzer to generate a large corpus of tests to seed fuzzing, that achieve high coverage on the un-mutated red-black tree.  Then, we can run a longer fuzzing run on each mutant, using the seeds to make sure we're not spending most of the time just "learning" the red-black tree API.  So, after generating a corpus on the original code for an hour, we run libFuzzer, starting from that corpus, for ten minutes.  How many additional mutants does this kill?
 
 ## Further Reading
 
@@ -377,38 +377,56 @@ For a more involved example using DeepState to test an API, see the [TestFs](htt
 
 ## Appendix: Symbolic Execution
 
-DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples, even if we reduce the test length to something very short, like 3 or 4 steps.  The `symex.cpp` file, however, is a simple test that these engines can handle.   You'll want to compile `symex.cpp` and the C files for the red-black tree all without various sanitizers, to make life easy for the binary analysis tools.  Something as simple as this can work:
+DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth like 100 -- unsurprising, given the tools are trying to generate all possible paths through the code!  Simply lowering the depth to a more reasonable number, alone, also doesn't help.   You'll want to compile `deepstate_harness.cpp` and the C files for the red-black tree all without various sanitizers, to make life easy for the binary analysis tools.  Something as simple as this can work:
 
 ```shell
 clang -c red_black_tree.c container.c stack.c misc.c
-clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o
-deepstate-angr ./symex
+clang++ -o ds_rb_small deepstate_harness -ldeepstate red_black_tree.o stack.o misc.o container.o -static -Wl,--allow-multiple-definition,--no-export-dynamic
+deepstate-manticore ./ds_rb_small
 ```
 
-The output will be tests covering all 583 paths through the code:
+The result will be tests covering all paths through the code, in the `out` directory.  For depth 4, this will take quite some time to run -- many hours, since each path takes a few minutes, and there are going to be a lot of paths.
 
 ```
-...
-INFO    | 2018-12-13 06:11:58,262 | deepstate | Input: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 80 00 00 00 ...
-INFO    | 2018-12-13 06:11:58,262 | deepstate | Saving input to out/symex.cpp/RBTree_TinySymex/5d36b232c21bd795ae3926b0441fe608.pass
-INFO    | 2018-12-13 06:11:59,916 | deepstate | Running RBTree_TinySymex from symex.cpp(42)
-INFO    | 2018-12-13 06:11:59,952 | deepstate | symex.cpp(56): INSERT:0 0x0000000000000000
-INFO    | 2018-12-13 06:11:59,956 | deepstate | symex.cpp(61): DELETE:1
-INFO    | 2018-12-13 06:11:59,987 | deepstate | symex.cpp(74): INSERT:-2147483648 0x0000000000000000
-INFO    | 2018-12-13 06:11:59,989 | deepstate | symex.cpp(79): DELETE:-2147483647
-INFO    | 2018-12-13 06:12:00,013 | deepstate | symex.cpp(92): INSERT:-2147483646 0x0000000000000000
-INFO    | 2018-12-13 06:12:00,015 | deepstate | symex.cpp(97): DELETE:-2147483647
-INFO    | 2018-12-13 06:12:00,015 | deepstate | Passed: RBTree_TinySymex
-INFO    | 2018-12-13 06:12:00,016 | deepstate | Input: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 80 00 00 00 ...
-INFO    | 2018-12-13 06:12:00,016 | deepstate | Saving input to out/symex.cpp/RBTree_TinySymex/39e3b8f2bf06a7992e2533ceb82f9109.pass
-INFO    | 2018-12-13 06:12:01,607 | deepstate | Running RBTree_TinySymex from symex.cpp(42)
-INFO    | 2018-12-13 06:12:01,636 | deepstate | symex.cpp(56): INSERT:0 0x0000000000000000
-INFO    | 2018-12-13 06:12:01,640 | deepstate | symex.cpp(61): DELETE:1
-INFO    | 2018-12-13 06:12:01,668 | deepstate | symex.cpp(74): INSERT:-2147483647 0x0000000000000000
-INFO    | 2018-12-13 06:12:01,671 | deepstate | symex.cpp(79): DELETE:-2147483646
-INFO    | 2018-12-13 06:12:01,701 | deepstate | symex.cpp(92): INSERT:-2147483646 0x0000000000000000
-INFO    | 2018-12-13 06:12:01,705 | deepstate | symex.cpp(97): DELETE:-2147483648
-INFO    | 2018-12-13 06:12:01,705 | deepstate | Passed: RBTree_TinySymex
+INFO:deepstate.mcore:Running 1 tests across 1 workers
+INFO:deepstate:Running RBTree_GeneralFuzzer from small_harness.cpp(78)
+INFO:deepstate:small_harness.cpp(86): No duplicates allowed.
+INFO:deepstate:small_harness.cpp(122): 0: DELETE:0
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(113): 1: FIND:0
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(103): 2: INSERT:0 0x0000000000000000
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(107): 3: AVOIDING DUPLICATE INSERT:0
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(195): Destroying the tree...
+INFO:deepstate:Passed: RBTree_GeneralFuzzer
+INFO:deepstate:Input: 01 00 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 ...
+INFO:deepstate:Saving input to out/small_harness.cpp/RBTree_GeneralFuzzer/338f2d888d65f5a0f98e060a45c22a8d.pass
+INFO:deepstate:Input: 01 00 00 00 00 02 00 00 00 00 00 00 00 01 00 00 00 00 00 00 ...
+INFO:deepstate:Saving input to out/small_harness.cpp/RBTree_GeneralFuzzer/338f2d888d65f5a0f98e060a45c22a8d.pass
+INFO:deepstate:Running RBTree_GeneralFuzzer from small_harness.cpp(78)
+INFO:deepstate:small_harness.cpp(86): No duplicates allowed.
+INFO:deepstate:small_harness.cpp(122): 0: DELETE:0
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(103): 1: INSERT:0 0x0000000000000000
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(107): 2: AVOIDING DUPLICATE INSERT:0
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(107): 3: AVOIDING DUPLICATE INSERT:0
+INFO:deepstate:small_harness.cpp(190): checkRep...
+INFO:deepstate:small_harness.cpp(192): RBTreeVerify...
+INFO:deepstate:small_harness.cpp(195): Destroying the tree...
+INFO:deepstate:Passed: RBTree_GeneralFuzzer
+INFO:deepstate:Input: 01 00 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ...
+INFO:deepstate:Saving input to out/small_harness.cpp/RBTree_GeneralFuzzer/e1a373b00c96c68e6d5f1526c4cab198.pass
 ...
 ```
 
