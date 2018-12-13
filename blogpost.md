@@ -49,7 +49,7 @@ Translating John's fuzzer into a DeepState test is relatively easy.  [Here is a 
 
 - Replace various `rand() % NNN` calls with `DeepState_Int()`, `DeepState_Char()` and `DeepState_IntInRange(...)` calls
    - DeepState provides calls to generate most of the basic data types you want, optionally over restricted ranges
-   - Using `rand()` in DeepState will create a nondeterministic test of little value; let DeepState make `random` choices for you
+   - Using `rand()` in DeepState will create a nondeterministic test of little value; let DeepState make "random" choices for you
 
 - Replace the `switch` statement choosing what API call to make with DeepState's `Oneof` construct
    - `OneOf` takes a list of C++ lambdas, and chooses one to execute 
@@ -199,7 +199,7 @@ user	0m0.011s
 sys	0m0.131s
 ```
 
-I've omitted much of the output above, since showing all 49 steps before the detection of the problem is a bit much, and the details of your output will certainly vary.  The big difference, besides the verbose output, from John's fuzzer, is (1) you may find a different assertion violation and (2) the fact that DeepState _saved a test case_.  The name of your saved test case will, of course, be different, since the names are uniquely generated for each saved test.  To replay the test, I would do this:
+I've omitted much of the output above, since showing all 49 steps before the detection of the problem is a bit much, and the details of your output will certainly vary.  The big difference, besides the verbose output, from John's fuzzer, is the fact that DeepState _saved a test case_.  The name of your saved test case will, of course, be different, since the names are uniquely generated for each saved test.  To replay the test, I would do this:
 
 ```shell
 ./ds_rb --input_test_file tests/6de8b2ffd42af6878875833c0cbfa9ea09617285.crash
