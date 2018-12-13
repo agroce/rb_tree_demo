@@ -373,7 +373,7 @@ For a more involved example using DeepState to test an API, see the [TestFs](htt
 
 ## Appendix: Symbolic Execution
 
-DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the red-black tree or file system examples, even if we reduce the test length to something very short, like 3 or 4 steps.  The `symex.cpp` file, however, is a simple test that these engines can handle.   You'll want to compile `symex.cpp` and the C files for the red-black tree all without various sanitizers, to make life easy for the binary analysis tools.  Something as simple as this can work:
+DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples, even if we reduce the test length to something very short, like 3 or 4 steps.  The `symex.cpp` file, however, is a simple test that these engines can handle.   You'll want to compile `symex.cpp` and the C files for the red-black tree all without various sanitizers, to make life easy for the binary analysis tools.  Something as simple as this can work:
 
 ```shell
 clang -c red_black_tree.c container.c stack.c misc.c
