@@ -378,8 +378,34 @@ DeepState also supports symbolic execution.  Unfortunately, at this time, neithe
 ```shell
 clang -c red_black_tree.c container.c stack.c misc.c
 clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o
-deepstate-manticore ./symex
 deepstate-angr ./symex
+```
+
+The output will be tests covering all 583 paths through the code:
+
+```
+...
+INFO    | 2018-12-13 06:11:58,262 | deepstate | Input: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 80 00 00 00 ...
+INFO    | 2018-12-13 06:11:58,262 | deepstate | Saving input to out/symex.cpp/RBTree_TinySymex/5d36b232c21bd795ae3926b0441fe608.pass
+INFO    | 2018-12-13 06:11:59,916 | deepstate | Running RBTree_TinySymex from symex.cpp(42)
+INFO    | 2018-12-13 06:11:59,952 | deepstate | symex.cpp(56): INSERT:0 0x0000000000000000
+INFO    | 2018-12-13 06:11:59,956 | deepstate | symex.cpp(61): DELETE:1
+INFO    | 2018-12-13 06:11:59,987 | deepstate | symex.cpp(74): INSERT:-2147483648 0x0000000000000000
+INFO    | 2018-12-13 06:11:59,989 | deepstate | symex.cpp(79): DELETE:-2147483647
+INFO    | 2018-12-13 06:12:00,013 | deepstate | symex.cpp(92): INSERT:-2147483646 0x0000000000000000
+INFO    | 2018-12-13 06:12:00,015 | deepstate | symex.cpp(97): DELETE:-2147483647
+INFO    | 2018-12-13 06:12:00,015 | deepstate | Passed: RBTree_TinySymex
+INFO    | 2018-12-13 06:12:00,016 | deepstate | Input: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 80 00 00 00 ...
+INFO    | 2018-12-13 06:12:00,016 | deepstate | Saving input to out/symex.cpp/RBTree_TinySymex/39e3b8f2bf06a7992e2533ceb82f9109.pass
+INFO    | 2018-12-13 06:12:01,607 | deepstate | Running RBTree_TinySymex from symex.cpp(42)
+INFO    | 2018-12-13 06:12:01,636 | deepstate | symex.cpp(56): INSERT:0 0x0000000000000000
+INFO    | 2018-12-13 06:12:01,640 | deepstate | symex.cpp(61): DELETE:1
+INFO    | 2018-12-13 06:12:01,668 | deepstate | symex.cpp(74): INSERT:-2147483647 0x0000000000000000
+INFO    | 2018-12-13 06:12:01,671 | deepstate | symex.cpp(79): DELETE:-2147483646
+INFO    | 2018-12-13 06:12:01,701 | deepstate | symex.cpp(92): INSERT:-2147483646 0x0000000000000000
+INFO    | 2018-12-13 06:12:01,705 | deepstate | symex.cpp(97): DELETE:-2147483648
+INFO    | 2018-12-13 06:12:01,705 | deepstate | Passed: RBTree_TinySymex
+...
 ```
 
 See the DeepState documentation for more information on how to use symbolic execution.
