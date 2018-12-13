@@ -357,9 +357,11 @@ Since we don't check the exact value of the `red` field, but use it to branch (s
 
 If we were really testing this red-black tree as a critical piece of code, we would probably at this point:
 
-- Make a tool to throw out all mutants inside comments, inside the `InorderTreePrint` function, or that remove an assertion.
+- Definitely make a tool (like a 10-line Python script, not anything heavyweight!) to throw out all mutants inside comments, inside the `InorderTreePrint` function, or that remove an assertion.
 
-- Examine the remaining mutants (maybe 200 or so) carefully, to make sure we're not missing anything.
+- We might compile all the mutants and compare binaries with each other and the original file, to throw out obvious equivalent mutants and redundant mutants.  This step can be a little annoying because compilers don't always produce equivalent binaries, due to timestamps generated at compile time, which is why I skipped over it in the discussion above.
+
+- Examine the remaining mutants (maybe 200 or so, tops) carefully, to make sure we're not missing anything.  Finding categories of "that's fine" mutants often makes this process much easier than it sounds off hand (things like "assertion removals are always ok").
 
 The process of (1) making a test generator then (2) applying mutation testing and (3) actually looking at the surviving mutants and using them to improve our testing can be thought of as a [_falsification-driven testing_ process](https://agroce.github.io/asej18.pdf).  For highly-critical, small pieces of code, this can be a very effective way to build an effective fuzzing regimen.
 
