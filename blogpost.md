@@ -38,7 +38,7 @@ AFL and other general-purpose fuzzers usually provide this kind of functionality
 
 That is precisely what [DeepState](https://github.com/trailofbits/deepstate) is.  Well, actually, DeepState also lets you use symbolic execution to generate inputs, but we'll come back to that, later.
 
-Translating John's fuzzer into a DeepState test is relatively easy.  [Here is a DeepState version of "the same fuzzer."](https://github.com/agroce/rb_tree_demo)  The primary changes for DeepState are:
+Translating John's fuzzer into a DeepState test is relatively easy.  [Here is a DeepState version of "the same fuzzer."](https://github.com/agroce/rb_tree_demo)  The primary changes for DeepState, all found in the file [`deepstate_harness.cpp`](https://github.com/agroce/rb_tree_demo/blob/master/deepstate_harness.cpp), are:
 
 - Remove `main` and replace it with a named test (`TEST(RBTree, GeneralFuzzer)`)
    - A DeepState file can contain more than one named test, though it is fine to only have one test
