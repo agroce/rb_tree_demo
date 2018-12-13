@@ -92,6 +92,7 @@ git clone https://github.com/agroce/rb_tree_demo
 cd rb_tree_demo
 make
 ```
+The makefile compiles everything with all the sanitizers I could think of (address, undefined, and integer) in order to catch more bugs in fuzzing.  This has a performance penalty, but is usually worth it.
 
 If you are on a Mac and using a non-Apple clang in order to get libFuzzer support, change `CC` and `CXX` in the Makefile to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
 
