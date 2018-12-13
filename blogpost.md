@@ -377,7 +377,9 @@ For a more involved example using DeepState to test an API, see the [TestFs](htt
 
 ## Appendix: Symbolic Execution
 
-DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth like 100 -- unsurprising, given the tools are trying to generate all possible paths through the code!  Simply lowering the depth to a more reasonable number, alone, also doesn't help.   You'll want to compile `deepstate_harness.cpp` and the C files for the red-black tree all without various sanitizers, to make life easy for the binary analysis tools.  Something as simple as this can work:
+[b]Note:  this doesn't work on Mac systems right now, unless you know enough to do a cross compile, and can get the binary analysis tools working with that.  I ran it on Linux inside docker.[/b]
+
+DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.   You'll need to compile `deepstate_harness.cpp` and the C files for the red-black tree statically and without sanitizers, to make life easy for the symbolic execution engine.  Something like this (after lowering LENGTH to something like 3 or 4) should work:
 
 ```shell
 clang -c red_black_tree.c container.c stack.c misc.c
