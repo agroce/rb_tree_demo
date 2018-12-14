@@ -41,7 +41,7 @@ void Assert(int assertion, char* error) {
 /**/
 /***********************************************************************/
 
-unsigned malloc_total = 0;
+unsigned long malloc_total = 0;
 
 void * SafeMalloc(size_t size) {
   
