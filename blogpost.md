@@ -420,7 +420,7 @@ We can see how well the 583 generated tests perform using the same mutation anal
 analyze_mutants red_black_tree.c "clang -c red_black_tree.c; clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o; ./symex --input_test_dir out --abort_on_fail --log_level 2" --verbose --fromFile compile.txt --timeout 40 --mutantDir mutants
 ```
 
-The results are not great.  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.
+The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.
 
 See the [DeepState  repo](https://github.com/trailofbits/deepstate) for more information on how to use symbolic execution.
 
