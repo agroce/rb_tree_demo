@@ -56,7 +56,45 @@ Translating John's fuzzer into a DeepState test is relatively easy.  [Here is a 
    - This change is not strictly required, but using `OneOf` simplifies the code and allows optimization of choices and smart test reduction
    - Another version of `Oneof` takes a fixed-size array as input, and returns some value in it; e.g., `OneOf("abcd")` will produce a char, either `a`, `b`, `c`, or `d`
 
-There are a number of other cosmetic (e.g. formatting, variable naming) changes, but the essence of the fuzzer is clearly preserved here.  With these changes, the fuzzer works almost as before, except that instead of running the `fuzz_rb` executable, we'll use DeepState to run the test we've defined and generate input values that choose which function calls to make, what values to insert in the red-black tree, and all the other decisions represented by our `DeepState_Int`, `OneOf` and other calls.
+There are a number of other cosmetic (e.g. formatting, variable naming) changes, but the essence of the fuzzer is clearly preserved here.  With these changes, the fuzzer works almost as before, except that instead of running the `fuzz_rb` executable, we'll use DeepState to run the test we've defined and generate input values that choose which function calls to make, what values to insert in the red-black tree, and all the other decisions represented by `DeepState_Int`, `OneOf` and other calls:
+
+```
+int GetValue() {
+  if (!restrictValues) {
+    return DeepState_Int();
+  } else {
+    return DeepState_IntInRange(0, valueRange);
+  }
+}
+```
+
+```
+  for (int n = 0; n < LENGTH; n++) {
+    OneOf(
+	  [&] {
+	    int key = GetValue();
+	    int* ip = (int*)malloc(sizeof(int));
+	    *ip = key;
+	    if (!noDuplicates || !containerFind(*ip)) {
+	      void* vp = voidP();
+	      LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;
+	      RBTreeInsert(tree, ip, vp);
+	      containerInsert(*ip, vp);
+	    } else {
+	      LOG(INFO) << n << ": AVOIDING DUPLICATE INSERT:" << *ip;
+	      free(ip);	      
+	    }
+	  },
+	  [&] {
+	    int key = GetValue();
+	    LOG(INFO) << n << ": FIND:" << key;
+	    if ((node = RBExactQuery(tree, &key))) {
+	      ASSERT(containerFind(key)) << "Expected to find " << key;
+	    } else {
+	      ASSERT(!containerFind(key)) << "Expected not to find " << key;
+	    }
+	  },
+```
 
 ### Installing DeepState
 
