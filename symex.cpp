@@ -60,7 +60,7 @@ void RBTreeVerify(rb_red_blk_tree* tree) {
   InorderTreeVerify(tree,tree->root->left);
   ASSERT(idx == -1) << "idx should be -1!";
 }
-#endif REPLAY
+#endif
 
 TEST(RBTree, TinySymex) {
   rb_red_blk_node* node;
