@@ -72,17 +72,17 @@ TEST(RBTree, TinySymex) {
   int* ip;
   void* vp;
 
-  for (int i = 0; i < LENGTH; i++) {
+  for (int n = 0; n < LENGTH; n++) {
     key = DeepState_Int();
     ip = (int*)malloc(sizeof(int));
     *ip = key;
     vp = voidP();
-    LOG(INFO) << "INSERT:" << *ip << " " << vp;  
+    LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;  
     RBTreeInsert(tree, ip, vp);
     containerInsert(*ip, vp);
 
     key = DeepState_Int();
-    LOG(INFO) << "DELETE:" << key;  
+    LOG(INFO) << n << ": DELETE:" << key;  
     if ((node = RBExactQuery(tree, &key))) {
       ASSERT(containerFind(key)) << "Expected to find " << key;
       RBDelete(tree, node);
