@@ -424,7 +424,7 @@ clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container
 deepstate-manticore ./symex
 ```
 
-The result will be tests covering all paths through the code, in the `out` directory.  This may take quite some time to run, since each path can take a minute or two to generate, and there are quite a few paths.
+The result will be tests covering all paths through the code, in the `out` directory.  This may take quite some time to run, since each path can take a minute or two to generate, and there are quite a few paths.  If `deepstate-manticore` is too slow, try `deepstate-angr` (or vice versa), since different code is best suited for different symbolic execution engines (this is one of the purposes of DeepState -- to make shopping around for a good back-end easy).
 
 ```
 INFO:deepstate.mcore:Running 1 tests across 1 workers
