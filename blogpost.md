@@ -250,7 +250,9 @@ We just need to insert three identical values into the tree to expose the proble
 
 ## Mutation Testing
 
-Introducing one bug by hand is fine, and we could try it again, but "the plural of anecdote is not data."  However, this is not strictly true.  If we have enough anecdotes, we can probably call it data (the field of "big multiple anecdotes" is due to take off any day now).  In software testing, creating multiple "fake bugs" has a name, _mutation testing_ (or _mutation analysis_).  Mutation testing works by automatically generating lots of small changes to a program, in the expectation that most such changes will make the program incorrect.  A test suite or fuzzer is better if it detects more of these changes.  There are many tools for mutation testing available, especially for Java.  The tools for C code are less robust, or more difficult to use, in general.  We recently released a tool, the [universalmutator](https://github.com/agroce/universalmutator), that uses regular expressions to allow mutation for many languages, including C and C++ (and Swift, Solidity, Rust, and numerous other languages previously without mutation testing tools).  We'll use the universalmutator to see how well our fuzzers do at detecting artificial red-black tree bugs.  Besides generality, one advantage of universalmutator is that it produces lots of mutants, including ones that are likely equivalent but can produce very subtle bugs, that are not supported in most mutation systems.  For high-stakes software, this can be worth the additional effort in analyzing and examining the mutants.
+Introducing one bug by hand is fine, and we could try it again, but "the plural of anecdote is not data."  However, this is not strictly true.  If we have enough anecdotes, we can probably call it data (the field of "big multiple anecdotes" is due to take off any day now).  In software testing, creating multiple "fake bugs" has a name, _mutation testing_ (or _mutation analysis_).  Mutation testing works by automatically generating lots of small changes to a program, in the expectation that most such changes will make the program incorrect.  A test suite or fuzzer is better if it detects  more of these changes.  In the lingo of mutation testing, a detected mutant is "killed."  The phrasing is a bit harsh on mutants, but in testing a certain hard-heartedness towards bugs is perhaps in order.
+
+There are many tools for mutation testing available, especially for Java.  The tools for C code are less robust, or more difficult to use, in general.  We recently released a tool, the [universalmutator](https://github.com/agroce/universalmutator), that uses regular expressions to allow mutation for many languages, including C and C++ (and Swift, Solidity, Rust, and numerous other languages previously without mutation testing tools).  We'll use the universalmutator to see how well our fuzzers do at detecting artificial red-black tree bugs.  Besides generality, one advantage of universalmutator is that it produces lots of mutants, including ones that are likely equivalent but can produce very subtle bugs, that are not supported in most mutation systems.  For high-stakes software, this can be worth the additional effort in analyzing and examining the mutants.
 
 Installing universalmutator and generating some mutants is easy:
 
@@ -317,11 +319,11 @@ Is this why John's fuzzer kills 25 mutants that DeepState does not?  Well, not q
 
 The DeepState fuzzer is not finding these because it runs each test in a fork, and so the address space doesn't allocate enough times to cause a problem for these particular checks!  Now, in theory, this shouldn't be the case for libFuzzer, which runs without forking.  And, sure enough, if we give the slow-and-steady tortoise libFuzzer 5 minutes instead of 60 seconds, it catches all of these mutants, too.  No amount of additional fuzzing will help the DeepState fuzzer.  In this case, the bug is strange enough and unlikely enough we can perhaps ignore it.  The issue is not the speed of our fuzzer, or the quality (exactly), but the fact that different fuzzing environments create subtle differences in _what tests we are actually running_.
 
-Now that we've seen this problem, we'll add an option to DeepState to make the brute force fuzzer run in a [non-forking mode](https://github.com/trailofbits/deepstate/issues/90) (by the time you read this, the option may already exist).  Unfortunately, this is not a great solution overall:  while libFuzzer "detects" these bugs, it can't produce a good saved test case for them, since the failure depends on all the mallocs that have been issued, and the exact addresses of certain pointers.  Perhaps this bug is not really worth our trouble.  I think we can say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
+Now that we've seen this problem, we'll add an option to DeepState to make the brute force fuzzer run in a [non-forking mode](https://github.com/trailofbits/deepstate/issues/90) (by the time you read this, the option may already exist).  Unfortunately, this is not a great solution overall:  while libFuzzer "detects" these bugs, it can't produce a good saved test case for them, since the failure depends on all the mallocs that have been issued, and the exact addresses of certain pointers.  Perhaps this bug is not really worth our trouble, especially since libFuzzer can detect it.  I think we can say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
 
 ### Examining the Mutants
 
-This takes care of the differences in our fuzzers' performances.  But how about the remaining mutants?  None of them are killed by 300 seconds of fuzzing using any of our fuzzers.  Do they show holes in our testing?  There are various ways to detect _equivalent_ mutants (mutants that don't actually change the program semantics, and so can't possibly be killed), including comparing the binaries generated by an optimizing compiler.  For our purposes, we will just examine a random sample of the unkilled mutants, to confirm that at least most of the unkilled mutants are genuinely uninteresting.
+This takes care of the differences in our fuzzers' performances.  But how about the remaining mutants?  None of them are killed by 5 minutes of fuzzing using any of our fuzzers.  Do they show holes in our testing?  There are various ways to detect _equivalent_ mutants (mutants that don't actually change the program semantics, and so can't possibly be killed), including comparing the binaries generated by an optimizing compiler.  For our purposes, we will just examine a random sample of the 298 unkilled mutants, to confirm that at least most of the unkilled mutants are genuinely uninteresting.
 
 - The first mutant changes an `<=` in a comment.  There's no way we can kill this, and comparing compiled binaries would have proven it.
 
@@ -363,9 +365,13 @@ If we were really testing this red-black tree as a critical piece of code, we wo
 
 - We might compile all the mutants and compare binaries with each other and the original file, to throw out obvious equivalent mutants and redundant mutants.  This step can be a little annoying because compilers don't always produce equivalent binaries, due to timestamps generated at compile time, which is why I skipped over it in the discussion above.
 
-- Examine the remaining mutants (maybe 200 or so, tops) carefully, to make sure we're not missing anything.  Finding categories of "that's fine" mutants often makes this process much easier than it sounds off hand (things like "assertion removals are always ok").
+- Examine the remaining mutants (maybe 200 or so) carefully, to make sure we're not missing anything.  Finding categories of "that's fine" mutants often makes this process much easier than it sounds off hand (things like "assertion removals are always ok").
 
-The process of (1) making a test generator then (2) applying mutation testing and (3) actually looking at the surviving mutants and using them to improve our testing can be thought of as a [_falsification-driven testing_ process](https://agroce.github.io/asej18.pdf).  For highly-critical, small pieces of code, this can be a very effective way to build an effective fuzzing regimen.
+The process of (1) making a test generator then (2) applying mutation testing and (3) actually looking at the surviving mutants and using them to improve our testing can be thought of as a [_falsification-driven testing_ process](https://agroce.github.io/asej18.pdf).  For highly-critical, small pieces of code, this can be a very effective way to build an effective fuzzing regimen.  It helped Paul E. McKenney [discover real bugs in the Linux kernel's RCU module](https://agroce.github.io/mutation17.pdf).
+
+## Just Fuzz it More
+
+Alternatively, before turning to mutant investigation, you can just fuzz the code more aggressively.  Our mutant sample suggests there won't be _many_ outstanding bugs, but perhaps there are a few.  Five minutes is not that extreme a fuzzing regimen; people expect to run AFL for days.  If we were really testing the red-black tree as a critical piece of code, we probably wouldn't give up after five minutes.  Which fuzzer would be best for this?  It's hard to know for sure, but one reasonable approach would be to first use libFuzzer to generate a large corpus of tests to seed fuzzing, that achieve high coverage on the un-mutated red-black tree.  Then, we can run a longer fuzzing run on each mutant, using the seeds to make sure we're not spending most of the time just "learning" the red-black tree API.  So, after generating a corpus on the original code for an hour, we run libFuzzer, starting from that corpus, for ten minutes.  How many additional mutants does this kill?  We can already guess it will be fewer than 30, based on our 3% sample.  A simple script, as described above, brings the number of mutants to analyze down to 174 by removing comment mutations, print function mutations, and assertion removals.
 
 ## Further Reading
 
@@ -373,6 +379,49 @@ For a more involved example using DeepState to test an API, see the [TestFs](htt
 
 ## Appendix: Symbolic Execution
 
-DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the red-black tree or file system examples, even if we reduce the test length to something very short, like 3 or 4 steps.  The `symex.cpp` file, however, is a simple test that these engines can handle.  See the DeepState documentation for how to use symbolic execution.  Note that you'll want to compile `symex.cpp` and the C files for the red-black tree all without various sanitizers, to make life easy for the binary analysis tools.
+**[Note:  this part doesn't work on Mac systems right now, unless you know enough to do a cross compile, and can get the binary analysis tools working with that.  I ran it on Linux inside docker.]**
+
+DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth anything like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.  You're likely to get solver timeout errors even at depth 3.   Instead, we use `symex.cpp`, which does a much simpler insert/delete pattern, with comparisons to the reference, 3 times in a row.
+
+```shell
+clang -c red_black_tree.c container.c stack.c misc.c
+clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o -static -Wl,--allow-multiple-definition,--no-export-dynamic
+deepstate-manticore ./symex
+```
+
+The result will be tests covering all paths through the code, in the `out` directory.  This may take quite some time to run, since each path can take a minute or two to generate, and there are quite a few paths.
+
+```
+INFO:deepstate.mcore:Running 1 tests across 1 workers
+INFO:deepstate:Running RBTree_TinySymex from symex.cpp(42)
+INFO:deepstate:symex.cpp(56): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(61): DELETE:0
+INFO:deepstate:symex.cpp(74): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(79): DELETE:0
+INFO:deepstate:symex.cpp(92): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(97): DELETE:-2147483648
+INFO:deepstate:Passed: RBTree_TinySymex
+INFO:deepstate:Input: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ...
+INFO:deepstate:Saving input to out/symex.cpp/RBTree_TinySymex/89b9a0aba0287935fa5055d8cb402b37.pass
+INFO:deepstate:Running RBTree_TinySymex from symex.cpp(42)
+INFO:deepstate:symex.cpp(56): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(61): DELETE:0
+INFO:deepstate:symex.cpp(74): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(79): DELETE:0
+INFO:deepstate:symex.cpp(92): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(97): DELETE:0
+INFO:deepstate:Passed: RBTree_TinySymex
+...
+```
+
+We can see how well the 583 generated tests perform using the same mutation analysis as before:
+
+```shell
+analyze_mutants red_black_tree.c "clang -c red_black_tree.c; clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o; ./symex --input_test_dir out --abort_on_fail --log_level 2" --verbose --fromFile compile.txt --timeout 40 --mutantDir mutants
+```
+
+The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.
+
+See the [DeepState  repo](https://github.com/trailofbits/deepstate) for more information on how to use symbolic execution.
 
 
