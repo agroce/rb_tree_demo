@@ -134,9 +134,9 @@ make
 ```
 The makefile compiles everything with all the sanitizers I could think of (address, undefined, and integer) in order to catch more bugs in fuzzing.  This has a performance penalty, but is usually worth it.
 
-If you are on a Mac and using a non-Apple clang in order to get libFuzzer support, change `CC` and `CXX` in the Makefile to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
+If you are on a Mac and using a non-Apple clang in order to get libFuzzer support, change `CC` and `CXX` in the [Makefile](https://github.com/agroce/rb_tree_demo/blob/master/Makefile) to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
 
-This will give you a few different executables of interest.  One, `fuzz_rb` is simply John's fuzzer, modified to use a 60 second timeout instead of a fixed number of "meta-iterations."  The `ds_rb` executable is the DeepState executable.  You can fuzz the red-black tree using a simple brute-force fuzzer (that behaves very much like John's original fuzzer):
+This will give you a few different executables of interest.  One, `fuzz_rb` is simply [John's fuzzer](https://github.com/agroce/rb_tree_demo/blob/master/fuzz_red_black_tree.c), modified to use a 60 second timeout instead of a fixed number of "meta-iterations."  The `ds_rb` executable is the DeepState executable.  You can fuzz the red-black tree using a simple brute-force fuzzer (that behaves very much like John's original fuzzer):
 
 ```shell
 mkdir tests
@@ -145,7 +145,8 @@ mkdir tests
 
 If you leave out the `log_level` specification, you can see all the tests DeepState generates and runs.  The `tests` directory should be empty at the termination of fuzzing, since the red-black tree code in the repo (to my knowledge) has no bugs.  If you add `--fuzz_save_passing` to the options, you will end up with a large number of files for passing tests in the directory.
 
-Finally, we can use libFuzzer to generate tests.
+Finally, we can use libFuzzer to generate tests:
+
 ```shell
 mkdir corpus
 ./ds_rb_lf corpus -use_value_profile=1 -detect_leaks=0 -max_total_time=60
@@ -415,7 +416,7 @@ Alternatively, before turning to mutant investigation, you can just fuzz the cod
 
 **[Note:  this part doesn't work on Mac systems right now, unless you know enough to do a cross compile, and can get the binary analysis tools working with that.  I ran it on Linux inside docker.]**
 
-DeepState also supports symbolic execution, which, according to [some definitions](https://arxiv.org/pdf/1812.00140.pdf), is just another kind of fuzzing (white box fuzzing).  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth anything like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.  You're likely to get solver timeout errors even at depth 3.   Instead, we use `symex.cpp`, which does a much simpler insert/delete pattern, with comparisons to the reference, 3 times in a row.
+DeepState also supports symbolic execution, which, according to [some definitions](https://arxiv.org/pdf/1812.00140.pdf), is just another kind of fuzzing (white box fuzzing).  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth anything like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.  You're likely to get solver timeout errors even at depth 3.   Instead, we use [`symex.cpp`](https://github.com/agroce/rb_tree_demo/blob/master/symex.cpp), which does a much simpler insert/delete pattern, with comparisons to the reference, 3 times in a row.
 
 ```shell
 clang -c red_black_tree.c container.c stack.c misc.c
