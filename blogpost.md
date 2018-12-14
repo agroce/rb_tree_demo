@@ -428,23 +428,23 @@ The result will be tests covering all paths through the code, in the `out` direc
 
 ```
 INFO:deepstate.mcore:Running 1 tests across 1 workers
-INFO:deepstate:Running RBTree_TinySymex from symex.cpp(42)
-INFO:deepstate:symex.cpp(56): INSERT:0 0x0000000000000000
-INFO:deepstate:symex.cpp(61): DELETE:0
-INFO:deepstate:symex.cpp(74): INSERT:0 0x0000000000000000
-INFO:deepstate:symex.cpp(79): DELETE:0
-INFO:deepstate:symex.cpp(92): INSERT:0 0x0000000000000000
-INFO:deepstate:symex.cpp(97): DELETE:-2147483648
+INFO:deepstate:Running RBTree_TinySymex from symex.cpp(65)
+INFO:deepstate:symex.cpp(80): 0: INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(85): 0: DELETE:0
+INFO:deepstate:symex.cpp(80): 1: INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(85): 1: DELETE:0
+INFO:deepstate:symex.cpp(80): 2: INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(85): 2: DELETE:-2147483648
 INFO:deepstate:Passed: RBTree_TinySymex
 INFO:deepstate:Input: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ...
 INFO:deepstate:Saving input to out/symex.cpp/RBTree_TinySymex/89b9a0aba0287935fa5055d8cb402b37.pass
-INFO:deepstate:Running RBTree_TinySymex from symex.cpp(42)
-INFO:deepstate:symex.cpp(56): INSERT:0 0x0000000000000000
-INFO:deepstate:symex.cpp(61): DELETE:0
-INFO:deepstate:symex.cpp(74): INSERT:0 0x0000000000000000
-INFO:deepstate:symex.cpp(79): DELETE:0
-INFO:deepstate:symex.cpp(92): INSERT:0 0x0000000000000000
-INFO:deepstate:symex.cpp(97): DELETE:0
+INFO:deepstate:Running RBTree_TinySymex from symex.cpp(65)
+INFO:deepstate:symex.cpp(80): 0: INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(85): 0: DELETE:0
+INFO:deepstate:symex.cpp(80): 1: INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(85): 1: DELETE:0
+INFO:deepstate:symex.cpp(80): 2: INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(85): 2: DELETE:0
 INFO:deepstate:Passed: RBTree_TinySymex
 ...
 ```
