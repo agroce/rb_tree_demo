@@ -389,10 +389,28 @@ clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container
 deepstate-manticore ./symex
 ```
 
-The result will be tests covering all paths through the code, in the `out` directory.  For depth 3, this will take quite some time to run -- many hours, since each path takes a few minutes, and there are going to be a lot of paths.
+The result will be tests covering all paths through the code, in the `out` directory.  This may take quite some time to run, since each path can take a minute or two to generate, and there are quite a few paths.
 
 ```
-
+INFO:deepstate.mcore:Running 1 tests across 1 workers
+INFO:deepstate:Running RBTree_TinySymex from symex.cpp(42)
+INFO:deepstate:symex.cpp(56): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(61): DELETE:0
+INFO:deepstate:symex.cpp(74): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(79): DELETE:0
+INFO:deepstate:symex.cpp(92): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(97): DELETE:-2147483648
+INFO:deepstate:Passed: RBTree_TinySymex
+INFO:deepstate:Input: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ...
+INFO:deepstate:Saving input to out/symex.cpp/RBTree_TinySymex/89b9a0aba0287935fa5055d8cb402b37.pass
+INFO:deepstate:Running RBTree_TinySymex from symex.cpp(42)
+INFO:deepstate:symex.cpp(56): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(61): DELETE:0
+INFO:deepstate:symex.cpp(74): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(79): DELETE:0
+INFO:deepstate:symex.cpp(92): INSERT:0 0x0000000000000000
+INFO:deepstate:symex.cpp(97): DELETE:0
+INFO:deepstate:Passed: RBTree_TinySymex
 ...
 ```
 
