@@ -381,12 +381,12 @@ For a more involved example using DeepState to test an API, see the [TestFs](htt
 
 **[Note:  this part doesn't work on Mac systems right now, unless you know enough to do a cross compile, and can get the binary analysis tools working with that.  I ran it on Linux inside docker.]**
 
-DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth anything like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.   You'll need to compile `deepstate_harness.cpp` and the C files for the red-black tree statically and without sanitizers, to make life easy for the symbolic execution engine.  Something like this (after lowering LENGTH to something like 2 or 3 -- even 4 is likely to terminate with a solver timeout -- should work:
+DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth anything like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.  You're likely to get solver timeout errors even at depth 3.   Instead, we use `symex.cpp`, which does a much simpler insert/delete pattern, with comparisons to the reference, 3 times.
 
 ```shell
 clang -c red_black_tree.c container.c stack.c misc.c
-clang++ -o ds_rb_small deepstate_harness -ldeepstate red_black_tree.o stack.o misc.o container.o -static -Wl,--allow-multiple-definition,--no-export-dynamic
-deepstate-manticore ./ds_rb_small
+clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o -static -Wl,--allow-multiple-definition,--no-export-dynamic
+deepstate-manticore ./symex
 ```
 
 The result will be tests covering all paths through the code, in the `out` directory.  For depth 3, this will take quite some time to run -- many hours, since each path takes a few minutes, and there are going to be a lot of paths.
