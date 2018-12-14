@@ -420,7 +420,52 @@ We can see how well the 583 generated tests perform using the same mutation anal
 analyze_mutants red_black_tree.c "clang -c red_black_tree.c; clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o; ./symex --input_test_dir out --abort_on_fail --log_level 2" --verbose --fromFile compile.txt --timeout 40 --mutantDir mutants
 ```
 
-The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.  Adding these checks after the final insert/delete pair kills an additional 165 mutants, bringing the kill rate up to 38.3%.  While not impressive compared to the fuzzers, this is very solid for tests involving only three insert operations, and the resulting test suite can execute in less than 15 seconds.  Improving the scalability of symbolic execution to make its benefits work for longer sequences and more complex operations is a major long-term goal for DeepState.
+The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.  Adding these checks after the final insert/delete pair kills an additional 165 mutants, bringing the kill rate up to 38.3%.  While not impressive compared to the fuzzers, there is a key point.  Five of these mutants are ones _not_ killed by any of the fuzzers:
+
+```
+703c703
+<   return left_black_cnt + (node->red ? 0 : 1);
+---
+>   return left_black_cnt % (node->red ? 0 : 1);
+```
+
+```
+701c701
+<   right_black_cnt = checkRepHelper (node->right, t);
+---
+>   /*right_black_cnt = checkRepHelper (node->right, t);*/
+```
+
+```
+700c700
+<   left_black_cnt = checkRepHelper (node->left, t);
+---
+>   /*left_black_cnt = checkRepHelper (node->left, t);*/
+```
+
+```
+703c703
+<   return left_black_cnt + (node->red ? 0 : 1);
+---
+>   return left_black_cnt / (node->red ? 0 : 1);
+```
+
+```
+703c703
+<   return left_black_cnt + (node->red ? 0 : 1);
+---
+>   /*return left_black_cnt + (node->red ? 0 : 1);*/
+```
+
+```
+236c236
+<   x->red=1;
+---
+>   /*x->red=1;*/
+
+```
+
+Symbolic execution is expensive and hard to scale, it can find subtle bugs that even aggressive fuzzing may miss.  A major long-term goal for DeepState is to increase the scalability of symbolic execution for API sequence testing, using high-level strategies not dependent on the underlying engine.
 
 See the [DeepState  repo](https://github.com/trailofbits/deepstate) for more information on how to use symbolic execution.
 
