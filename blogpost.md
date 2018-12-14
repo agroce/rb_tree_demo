@@ -5,7 +5,7 @@ Using
 take a hand-written red-black tree fuzzer and, with minimal effort,
 turn it into a fuzzer that provides the same testing power, but with
 support for replaying regression tests, reducing the size of
-discovered test cases for debugging, and support for multiple
+discovered test cases for debugging, and using multiple
 data-generation back-ends, including libFuzzer and AFL.  Using
 symbolic execution, we were even able to discover artificially
 introduced bugs that the original fuzzer couldn't find.  After reading
