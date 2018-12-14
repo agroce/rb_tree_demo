@@ -1,5 +1,19 @@
 # Fuzzing an API with DeepState
 
+Using
+[DeepState](https://github.com/trailofbits/deepstate), we were able to
+take a hand-written red-black tree fuzzer and, with minimal effort,
+turn it into a fuzzer that provides the same testing power, but with
+support for replaying regression tests, reducing the size of
+discovered test cases for debugging, and support for multiple
+data-generation back-ends, including libFuzzer and AFL.  Using
+symbolic execution, we were even able to discover artificially
+introduced bugs that the original fuzzer couldn't find.  After reading
+through this article, you should be able to get started applying
+high-powered automated test generation to your own APIs.
+
+## Background
+
 In 2013, John Regehr wrote a blog post on ["How to Fuzz an ADT Implementation."](https://blog.regehr.org/archives/896)  John talked at some length about general issues in gaining confidence that a data-type implementation is reliable, discussing code coverage, test oracles, and differential testing.  The article is well worth reading (it would be a good idea to read it before reading the rest of this article, in fact), and it gives a good overview of how to construct a simple custom fuzzer for an ADT, or, for that matter, any fairly self-contained API where there are good ways to check for correctness.
 
 The general problem is simple.  Suppose we have a piece of software that is, essentially, a library: a red-black tree, an AVL tree, a [file-system](https://github.com/agroce/testfs), an [in-memory store](https://github.com/redis/hiredis), or even a [crypto library](https://botan.randombit.net/).  The software provides a set of functions (or methods on objects), and we have some expectations about what will happen when we call those functions.  Traditional unit testing addresses this problem by having the developer (or us) write a series of small functions that look like:
