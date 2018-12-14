@@ -24,15 +24,6 @@ $ ./ds_rb_lf corpus -use_value_profile=1 -detect_leaks=0
 
 The leak detection disabling is because when the test terminates early due to violated assumes in ranges, etc., this will leak memory.
 
-To try mutation testing on this, you can install the [universalmutator](https://github.com/agroce/universalmutator) and mutate the red black tree implementation:
+A lot more information (more than you probably want) is [here](https://github.com/agroce/rb_tree_demo/blob/master/blogpost.md).
 
-```shell
-$ pip install universalmutator
-$ mutate red_black_tree.c
-```
 
-Then you can analyze a set of tests generated like this:
-
-```shell
-$ analyze_mutants red_black_tree.c "python findfailures.py corpus"
-```
