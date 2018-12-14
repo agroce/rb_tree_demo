@@ -499,6 +499,7 @@ The results are not great.  The tests kill 264 mutants (23.57%).  They can be so
 
 ```
 
+Five of these bugs are in the `checkRep` code, so may not be considered as critical (they won't cause bad behavior, just false positives in testing), but the last one is at the very start of `RBTreeInsert`.
 While running symbolic execution takes a while to run, generating tests like these on your code occasionally and using them in regression can be extremely valuable.  The 583 tests take less than 20 seconds to run, and detect bugs that even aggressive fuzzing may miss.  A major long-term goal for DeepState is to increase the scalability of symbolic execution for API sequence testing, using high-level strategies not dependent on the underlying engine.
 
 See the [DeepState  repo](https://github.com/trailofbits/deepstate) for more information on how to use symbolic execution.
