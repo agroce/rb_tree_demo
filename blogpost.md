@@ -240,13 +240,13 @@ user	0m0.011s
 sys	0m0.131s
 ```
 
-I've omitted much of the output above, since showing all 49 steps before the detection of the problem is a bit much, and the details of your output will certainly vary.  The big difference, besides the verbose output, from John's fuzzer, is the fact that DeepState _saved a test case_.  The name of your saved test case will, of course, be different, since the names are uniquely generated for each saved test.  To replay the test, I would do this:
+I've omitted much of the output above, since showing all 49 steps before the detection of the problem is a bit much, and the details of your output will certainly vary.  The big difference from John's fuzzer, besides the verbose output, is the fact that DeepState _saved a test case_.  The name of your saved test case will, of course, be different, since the names are uniquely generated for each saved test.  To replay the test, I would do this:
 
 ```shell
 ./ds_rb --input_test_file tests/6de8b2ffd42af6878875833c0cbfa9ea09617285.crash
 ```
 
-and I would get to see the whole disaster again, in gory detail.  As we said above, this isn't the most helpful output for seeing what's going on.  DeepState can help us here:
+and I would get to see the whole disaster again, in gory detail.  As we said above, this lengthy sequence of seemingly arbitrary operations isn't the most helpful test for seeing what's going on.  DeepState can help us here:
 
 ```
 deepstate-reduce ./ds_rb tests/6de8b2ffd42af6878875833c0cbfa9ea09617285.crash minimized.crash 
@@ -455,7 +455,7 @@ We can see how well the 583 generated tests perform using the same mutation anal
 analyze_mutants red_black_tree.c "clang -c red_black_tree.c; clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o; ./symex --input_test_dir out --abort_on_fail --log_level 2" --verbose --fromFile compile.txt --timeout 40 --mutantDir mutants
 ```
 
-The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.  Adding these checks after the final insert/delete pair kills an additional 165 mutants, bringing the kill rate up to 38.3%.  While not impressive compared to the fuzzers, there is a key point.  Six of these mutants are ones _not_ killed by any of the fuzzers, even the well-seeded ten minute libFuzzer runs:
+The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution, by compiling `symex.cpp` with `-DREPLAY`.  Adding these checks kills an additional 165 mutants, bringing the kill rate up to 38.3%.  While not impressive compared to the fuzzers, there is a very important point here.  Six of the mutants killed by the symbolic execution tests are ones _not_ killed by any of the fuzzers, even the well-seeded ten minute libFuzzer runs:
 
 ```
 703c703
