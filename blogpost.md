@@ -285,7 +285,13 @@ Assertion failed: (left_black_cnt == right_black_cnt), function checkRepHelper, 
 ERROR: Crashed: RBTree_GeneralFuzzer
 ```
 
-We just need to insert three identical values into the tree to expose the problem.  Remember to fix your `red_black_tree.c` before proceeding!
+We just need to insert three identical values into the tree to expose
+the problem.  Remember to fix your `red_black_tree.c` before
+proceeding!
+
+You can watch the whole process in action:
+
+[![asciicast](https://asciinema.org/a/ejc95RhW5B9oVsDgPPiKVPcCT.svg)](https://asciinema.org/a/ejc95RhW5B9oVsDgPPiKVPcCT)
 
 ## Mutation Testing
 
