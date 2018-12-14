@@ -64,7 +64,7 @@ AFL and other general-purpose fuzzers usually provide this kind of
 functionality, which makes fuzzing a much more practical tool in
 debugging.  Unfortunately, such fuzzers are not convenient for testing
 APIs.  They typically generate a file or byte buffer, and expect that
-the program being testing will take that file as input.  Turning a
+the program being tested will take that file as input.  Turning a
 series of bytes into a red-black tree test is probably easier and more
 fun than writing all the machinery for saving, replaying, and reducing
 tests, but it still seems like a lot of work that isn't directly
