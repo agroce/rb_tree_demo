@@ -7,6 +7,8 @@ extern "C" {
 #include "container.h"
 }
 
+#define LENGTH 3
+
 void IntDest(void* a) {
   free((int*)a);
 }
@@ -39,6 +41,27 @@ void *voidP() {
   return (void *)p;
 }
 
+#ifdef REPLAY
+int idx;
+
+void InorderTreeVerify(rb_red_blk_tree* tree, rb_red_blk_node* x) {
+  if (x != tree->nil) {
+    struct elt_t e;
+    InorderTreeVerify(tree,x->left);
+    e = containerGet (idx);
+    ASSERT(e.val == *(int *)x->key) << e.val << " should equal " << *(int *)x->key;
+    idx = containerNext (idx);
+    InorderTreeVerify(tree,x->right);
+  }
+}
+
+void RBTreeVerify(rb_red_blk_tree* tree) {
+  idx = containerStart();
+  InorderTreeVerify(tree,tree->root->left);
+  ASSERT(idx == -1) << "idx should be -1!";
+}
+#endif REPLAY
+
 TEST(RBTree, TinySymex) {
   rb_red_blk_node* node;
   
@@ -49,58 +72,30 @@ TEST(RBTree, TinySymex) {
   int* ip;
   void* vp;
 
-  key = DeepState_Int();
-  ip = (int*)malloc(sizeof(int));
-  *ip = key;
-  vp = voidP();
-  LOG(INFO) << "INSERT:" << *ip << " " << vp;  
-  RBTreeInsert(tree, ip, vp);
-  containerInsert(*ip, vp);
+  for (int i = 0; i < LENGTH; i++) {
+    key = DeepState_Int();
+    ip = (int*)malloc(sizeof(int));
+    *ip = key;
+    vp = voidP();
+    LOG(INFO) << "INSERT:" << *ip << " " << vp;  
+    RBTreeInsert(tree, ip, vp);
+    containerInsert(*ip, vp);
 
-  key = DeepState_Int();
-  LOG(INFO) << "DELETE:" << key;  
-  if ((node = RBExactQuery(tree, &key))) {
-    ASSERT(containerFind(key)) << "Expected to find " << key;
-    RBDelete(tree, node);
-    containerDelete(key);
-  } else {
-    ASSERT(!containerFind(key)) << "Expected not to find " << key;
-  }    
-  
-  key = DeepState_Int();
-  ip = (int*)malloc(sizeof(int));
-  *ip = key;
-  vp = voidP();
-  LOG(INFO) << "INSERT:" << *ip << " " << vp;  
-  RBTreeInsert(tree, ip, vp);
-  containerInsert(*ip, vp);
+    key = DeepState_Int();
+    LOG(INFO) << "DELETE:" << key;  
+    if ((node = RBExactQuery(tree, &key))) {
+      ASSERT(containerFind(key)) << "Expected to find " << key;
+      RBDelete(tree, node);
+      containerDelete(key);
+    } else {
+      ASSERT(!containerFind(key)) << "Expected not to find " << key;
+    }
 
-  key = DeepState_Int();
-  LOG(INFO) << "DELETE:" << key;  
-  if ((node = RBExactQuery(tree, &key))) {
-    ASSERT(containerFind(key)) << "Expected to find " << key;
-    RBDelete(tree, node);
-    containerDelete(key);
-  } else {
-    ASSERT(!containerFind(key)) << "Expected not to find " << key;
-  }    
-  
-  key = DeepState_Int();
-  ip = (int*)malloc(sizeof(int));
-  *ip = key;
-  vp = voidP();
-  LOG(INFO) << "INSERT:" << *ip << " " << vp;  
-  RBTreeInsert(tree, ip, vp);
-  containerInsert(*ip, vp);  
-
-  key = DeepState_Int();
-  LOG(INFO) << "DELETE:" << key;  
-  if ((node = RBExactQuery(tree, &key))) {
-    ASSERT(containerFind(key)) << "Expected to find " << key;
-    RBDelete(tree, node);
-    containerDelete(key);
-  } else {
-    ASSERT(!containerFind(key)) << "Expected not to find " << key;
-  }      
-  
+#ifdef REPLAY
+    LOG(INFO) << "checkRep...";
+    checkRep(tree); 
+    LOG(INFO) << "RBTreeVerify...";   
+    RBTreeVerify(tree);
+#endif
+  }
 }
