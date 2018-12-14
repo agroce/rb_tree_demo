@@ -1,10 +1,6 @@
 
 # prompt> make
 # builds everything and links in test program test_rb
-#
-# prompt> make mem_check
-# Rebuilds everything using dmalloc and does memory testing.
-# Only works if you have dmalloc installed (see http://dmalloc.com).
 
 SRCS = test_red_black_tree.c red_black_tree.c stack.c misc.c
 
@@ -18,11 +14,10 @@ OBJSDS = red_black_tree.o stack.o misc.o container.o
 
 OBJSDSLF = lf_red_black_tree.o lf_stack.o lf_misc.o lf_container.o
 
-CC = clang -fsanitize=undefined,integer,address
-#CC = clang -fsanitize=integer
+CC = clang
+CXX = clang++
 
-#CFLAGS = -g -O0 -coverage -fprofile-arcs -Wall -pedantic
-CFLAGS = -O3 -Wall -pedantic -g
+CFLAGS = -O3 -Wall -pedantic -g -fsanitize=undefined,integer,address
 
 PROGRAM = test_rb
 
@@ -34,8 +29,6 @@ DS1 = ds_rb
 # libFuzzer executable
 DS2 = ds_rb_lf
 
-.PHONY:	mem_check clean
-
 all: $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2)
 
 $(PROGRAM): 	$(OBJS)
@@ -45,33 +38,10 @@ $(PROGRAM2): 	$(OBJS2)
 		$(CC) $(CFLAGS) $(OBJS2) -o $(PROGRAM2) $(DMALLOC_LIB)
 
 $(DS1): 	$(OBJSDS) deepstate_harness.cpp
-		clang++ -std=c++14 $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate -fsanitize=undefined,integer,address
+		$(CXX) -std=c++14 $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate
 
 $(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
-		clang++ -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
-
-mem_check:	
-		@if [ -e makefile.txt ] ; then \
-			echo "Using makefile.txt" ; \
-			$(MAKE) clean -f makefile.txt ; \
-			$(MAKE) $(PROGRAM) "CFLAGS=$(CFLAGS) -DDMALLOC" "DMALLOC_LIB=-ldmalloc" -f makefile.txt ; \
-		else \
-			echo "Using default makefile (i.e. no -f flag)." ; \
-			$(MAKE) clean ; \
-			$(MAKE) $(PROGRAM) "CFLAGS=$(CFLAGS) -DDMALLOC" "DMALLOC_LIB=-ldmalloc" ; \
-		fi
-		./simple_test.sh
-		@if [ -s unfreed.txt ] ; then \
-			echo " " ; \
-			echo "Leaked some memory.  See logfile for details." ;\
-		else \
-			echo " " ; \
-			echo "No memory leaks detected. " ;\
-			echo " " ; \
-			echo "Test passed. " ; \
-			echo " " ; \
-		fi
-
+		$(CXX) -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
 
 test_red_black_tree.o:	test_red_black_tree.c red_black_tree.c stack.c stack.h red_black_tree.h misc.h
 
@@ -92,10 +62,7 @@ lf_misc.o:		misc.h misc.c
 			$(CC) $(CFLAGS) -c -o lf_misc.o misc.c -fsanitize=fuzzer-no-link,undefined,address,integer
 
 clean:			
-	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) *.gcda *.gcno *.gcov unfreed.txt
-
-
-
+	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) *.gcda *.gcno *.gcov
 
 
 
