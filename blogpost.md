@@ -53,12 +53,12 @@ tree.  For a file system, you may expect that `chkdsk` will never find
 any errors after a series of valid file system operations.  In a
 crypto library (or a JSON parser, for that matter) you may want to
 check round-trip properties -- `message == decode(encode(message, key), key)`.  In many cases, such as with ADTs and file systems, you
-can use another implementation of (almost) the same functionality, and
+can use another implementation of the same or similar functionality, and
 compare results.  Such _differential_ testing is extremely powerful,
 because it lets you write a very complete specification of correctness
 with relatively little work.  
 
-John's post doesn't just give general advice, it includes links to a [working fuzzer for a red-black tree](https://github.com/regehr/rb_tree_demo).  The fuzzer is effective and a good example of how to really hammer an API, and is an excellent example of a solid [test harness](https://agroce.github.io/woda12.pdf) constructed around random value generation.  However, it's also not a completely practical testing tool.  It generates inputs, and tests the red-black tree, but when the fuzzer finds a bug, it simply prints an error message and crashes.  You don't learn anything but "Yes, your code has a bug, and here is the symptom."  This is not ideal.  Modifying the code to print out the test steps as they happen slightly improves the situation, but there are likely to be hundreds or thousands of steps before the failure.  It would be much more convenient if the fuzzer automatically stored failing test sequences in a file, minimized the sequences to make debugging easy, and it made it possible to replay old failing tests in a regression suites.  Writing the code to support all this (boring but useful) infrastructure is no fun, especially in C/C++, and dramatically increases the amount of work required for your testing effort.  Handling the more subtle aspects, such as avoiding saving tests unless they fail to increase testing speed, but trapping assertion violations and hard crashes so that you write the test to the file system before terminating, is also hard to get right.
+John's post doesn't just give general advice, it includes links to a [working fuzzer for a red-black tree](https://github.com/regehr/rb_tree_demo).  The fuzzer is effective and serves as a great example of how to really hammer an API using a solid [test harness](https://agroce.github.io/woda12.pdf) based on random value generation.  However, it's also not a completely practical testing tool.  It generates inputs, and tests the red-black tree, but when the fuzzer finds a bug, it simply prints an error message and crashes.  You don't learn anything but "Yes, your code has a bug, and here is the symptom."   Modifying the code to print out the test steps as they happen slightly improves the situation, but there are likely to be hundreds or thousands of steps before the failure.  It would be much more convenient if the fuzzer automatically stored failing test sequences in a file, minimized the sequences to make debugging easy, and it made it possible to replay old failing tests in a regression suites.  Writing the code to support all this infrastructure is no fun, especially in C/C++, and dramatically increases the amount of work required for your testing effort.  Handling the more subtle aspects, such as avoiding saving tests unless they fail to increase testing speed, but trapping assertion violations and hard crashes so that you write the test to the file system before terminating, is also hard to get right.
 
 AFL and other general-purpose fuzzers usually provide this kind of
 functionality, which makes fuzzing a much more practical tool in
@@ -82,9 +82,10 @@ what we want:  GoogleTest, but with the ability to use libFuzzer, AFL,
 
 ## Enter DeepState
 
-That is precisely what [DeepState](https://github.com/trailofbits/deepstate) is.  Well, actually, DeepState also lets you use symbolic execution to generate inputs, but we'll come back to that, later.
+That's what [DeepState](https://github.com/trailofbits/deepstate) is,
+and more.  (We'll get to the more, when we discuss symbolic execution).
 
-Translating John's fuzzer into a DeepState test is relatively easy.  [Here is a DeepState version of "the same fuzzer."](https://github.com/agroce/rb_tree_demo)  The primary changes for DeepState, all found in the file [`deepstate_harness.cpp`](https://github.com/agroce/rb_tree_demo/blob/master/deepstate_harness.cpp), are:
+Translating John's fuzzer into a DeepState test harness is relatively easy.  [Here is a DeepState version of "the same fuzzer."](https://github.com/agroce/rb_tree_demo)  The primary changes for DeepState, all found in the file [`deepstate_harness.cpp`](https://github.com/agroce/rb_tree_demo/blob/master/deepstate_harness.cpp), are:
 
 - Remove `main` and replace it with a named test (`TEST(RBTree, GeneralFuzzer)`)
    - A DeepState file can contain more than one named test, though it is fine to only have one test
