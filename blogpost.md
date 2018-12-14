@@ -269,7 +269,7 @@ WRITING REDUCED TEST WITH 50 BYTES TO minimized.crash
 Again, we omit some of the lengthy process of reducing the test.  The new test is easier to understand:
 
 ```
-./ds_rb --input_test_file minimzed.crash
+./ds_rb --input_test_file minimized.crash
 INFO: No test specified, defaulting to first test
 INFO: Initialized test input buffer with data from `minimized.crash`
 INFO: Running: RBTree_GeneralFuzzer from deepstate_harness.cpp(78)
@@ -344,7 +344,7 @@ The tool generates 2,602 mutants, but only 1,120 of these actually compile.  Ana
 
 ### "There ain't no such thing as a free lunch" (or is there?)
 
-DeepState's native fuzzer is, for a given amount of time, it appears, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a bytestream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
+DeepState's native fuzzer is, for a given amount of time, it appears, not as effective as John's "raw" fuzzer.  This shouldn't be a surprise: in fuzzing, speed is king.  Because DeepState is parsing a byte-stream, forking in order to save crashes, and producing extensive, user-controlled logging (among other things), it is impossible for it to generate and execute tests as quickly as John's bare-bones fuzzer.
 
 libFuzzer is even slower; in addition to all the services (except forking for crashes, which is handled by libFuzzer itself) provided by the DeepState fuzzer, libFuzzer is determining the code coverage and computing value profiles for every test, and performing computations needed to base future testing on those evaluations of input quality.
 
@@ -358,7 +358,7 @@ Is this why John's fuzzer kills 25 mutants that DeepState does not?  Well, not q
 
 The DeepState fuzzer is not finding these because it runs each test in a fork, and so the address space doesn't allocate enough times to cause a problem for these particular checks!  Now, in theory, this shouldn't be the case for libFuzzer, which runs without forking.  And, sure enough, if we give the slow-and-steady tortoise libFuzzer 5 minutes instead of 60 seconds, it catches all of these mutants, too.  No amount of additional fuzzing will help the DeepState fuzzer.  In this case, the bug is strange enough and unlikely enough we can perhaps ignore it.  The issue is not the speed of our fuzzer, or the quality (exactly), but the fact that different fuzzing environments create subtle differences in _what tests we are actually running_.
 
-Now that we've seen this problem, we'll add an option to DeepState to make the brute force fuzzer run in a [non-forking mode](https://github.com/trailofbits/deepstate/issues/90) (by the time you read this, the option may already exist).  Unfortunately, this is not a great solution overall:  while libFuzzer "detects" these bugs, it can't produce a good saved test case for them, since the failure depends on all the mallocs that have been issued, and the exact addresses of certain pointers.  Perhaps this bug is not really worth our trouble, especially since libFuzzer can detect it.  I think we can say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
+Now that we've seen this problem, we'll add an option to DeepState to make the brute force fuzzer run in a [non-forking mode](https://github.com/trailofbits/deepstate/issues/90) (by the time you read this, the option may already exist).  Unfortunately, this is not a great solution overall:  while libFuzzer "detects" these bugs, it can't produce a good saved test case for them, since the failure depends on all the `malloc`s that have been issued, and the exact addresses of certain pointers.  Perhaps this bug is not really worth our trouble, especially since libFuzzer can detect it.  I think we can say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
 
 ### Examining the Mutants
 
