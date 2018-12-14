@@ -268,7 +268,7 @@ This will generate a large number of mutants, most of which won't compile (the u
 analyze_mutants red_black_tree.c "make clean; make" --mutantDir mutants
 ```
 
-This will produce two files, `killed.txt` containing mutants that don't compile, and `notkilled.txt` containing mutants that do compile.  To see if a mutant is killed, the analysis tool just determines whether the command in quotes returns a non-zero exit code, or times out (the default timeout is 30 seconds; unless you have a very slow machine, this is plenty of time to compile our code here).
+This will produce two files, `killed.txt` containing mutants that don't compile, and `notkilled.txt` containing the 1120 mutants that actually compile.  To see if a mutant is killed, the analysis tool just determines whether the command in quotes returns a non-zero exit code, or times out (the default timeout is 30 seconds; unless you have a very slow machine, this is plenty of time to compile our code here).
 
 If we copy the `notkilled.txt` file containing valid (compiling) mutants to another file, we can then do some real mutation testing:
 
@@ -420,7 +420,7 @@ We can see how well the 583 generated tests perform using the same mutation anal
 analyze_mutants red_black_tree.c "clang -c red_black_tree.c; clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o; ./symex --input_test_dir out --abort_on_fail --log_level 2" --verbose --fromFile compile.txt --timeout 40 --mutantDir mutants
 ```
 
-The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.
+The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.  Adding these checks after the final insert/delete pair kills an additional 165 mutants, bringing the kill rate up to 38.3%.  While not impressive compared to the fuzzers, this is very solid for tests involving only three insert operations, and the resulting test suite can execute in less than 15 seconds.  Improving the scalability of symbolic execution to make its benefits work for longer sequences and more complex operations is a major long-term goal for DeepState.
 
 See the [DeepState  repo](https://github.com/trailofbits/deepstate) for more information on how to use symbolic execution.
 
