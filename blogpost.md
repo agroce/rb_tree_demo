@@ -381,7 +381,7 @@ For a more involved example using DeepState to test an API, see the [TestFs](htt
 
 **[Note:  this part doesn't work on Mac systems right now, unless you know enough to do a cross compile, and can get the binary analysis tools working with that.  I ran it on Linux inside docker.]**
 
-DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth anything like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.  You're likely to get solver timeout errors even at depth 3.   Instead, we use `symex.cpp`, which does a much simpler insert/delete pattern, with comparisons to the reference, 3 times.
+DeepState also supports symbolic execution.  Unfortunately, at this time, neither angr nor manticore (the two binary analysis engines we support) can scale to the full red-black tree or file system examples with a search depth anything like 100; this isn't really surprising, given the tools are trying to generate all possible paths through the code!  However, simply lowering the depth to a more reasonable number is also insufficient.  You're likely to get solver timeout errors even at depth 3.   Instead, we use `symex.cpp`, which does a much simpler insert/delete pattern, with comparisons to the reference, 3 times in a row.
 
 ```shell
 clang -c red_black_tree.c container.c stack.c misc.c
@@ -413,6 +413,14 @@ INFO:deepstate:symex.cpp(97): DELETE:0
 INFO:deepstate:Passed: RBTree_TinySymex
 ...
 ```
+
+We can see how well the 583 generated tests perform using the same mutation analysis as before:
+
+```shell
+analyze_mutants red_black_tree.c "clang -c red_black_tree.c; clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o; ./symex --input_test_dir out --abort_on_fail --log_level 2" --verbose --fromFile compile.txt --timeout 40 --mutantDir mutants
+```
+
+The results are not great.  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution.
 
 See the [DeepState  repo](https://github.com/trailofbits/deepstate) for more information on how to use symbolic execution.
 
