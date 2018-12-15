@@ -411,16 +411,19 @@ Is this why John's fuzzer kills 25 mutants that DeepState does not?  Well, not q
 
 The DeepState fuzzer is not finding these because it runs each test in a fork, and so the address space doesn't allocate enough times to cause a problem for these particular checks!  Now, in theory, this shouldn't be the case for libFuzzer, which runs without forking.  And, sure enough, if we give the slow-and-steady tortoise libFuzzer 5 minutes instead of 60 seconds, it catches all of these mutants, too.  No amount of additional fuzzing will help the DeepState fuzzer.  In this case, the bug is strange enough and unlikely enough we can perhaps ignore it.  The issue is not the speed of our fuzzer, or the quality (exactly), but the fact that different fuzzing environments create subtle differences in _what tests we are actually running_.
 
-Now that we've seen this problem, we'll add an option to DeepState to
-make the brute force fuzzer run in a
-[non-forking mode](https://github.com/trailofbits/deepstate/issues/90)
-(by the time you read this, the option may already exist).
-Unfortunately, this is not a great solution overall:  while libFuzzer
-"detects" these bugs, it can't produce a good saved test case for
+After we saw this problem, we added an option to DeepState to
+make the brute force fuzzer (or test replay) run in a non-forking mode: `--no_fork`.
+Unfortunately, this is not a complete solution:  while we can now
+detect these bugs, we can't produce a good saved test case for
 them, since the failure depends on all the `malloc`s that have been
-issued, and the exact addresses of certain pointers.  Perhaps this bug
-is not really worth our trouble, especially since libFuzzer can detect
-it.  We can safely say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
+issued, and the exact addresses of certain pointers.  However, it turns out
+that `--no_fork`  has a more important benefit:  it dramatically speeds up fuzzing and test
+replay on mac OS -- often by orders of magnitude.  While we omit it in our examples because it
+complicates analyzing mutants and can produce gigantic sequences of
+repeated error messages about stack smashing, you should
+probably use it for most fuzzing and test replay on mac OS.
+
+We can safely say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
 
 ### Examining the Mutants
 
