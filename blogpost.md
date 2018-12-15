@@ -562,8 +562,8 @@ These bugs are all in the `checkRep` code itself, which was not even
 targeted by symbolic execution.  While these bugs do not involve
 actual faulty red-black tree behavior, they show that our fuzzers
 could allow subtle flaws to be introduced into the red-black tree's
-tools for checking its own validity; in another context, these could
-be equally serious faults, and certainly show a gap in the
+tools for checking its own validity; in the right context, these could
+be  serious faults, and certainly show a gap in the
 fuzzer-based testing.  In order to see how hard to detect these faults
 are, we tried using libFuzzer on each of these mutants, with our one
 hour corpus, for one hour.  It was still unable to detect any of these
