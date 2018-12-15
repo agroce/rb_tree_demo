@@ -75,7 +75,7 @@ you really want is a unit testing framework like
 for varying the input values used in tests.  There are lots of 
 [tools](https://hypothesis.works/) for random testing, including my own 
 [TSTL](https://github.com/agroce/tstl), but few sophisticated ones
-target C/C++, and none that I can think of let you use any test
+target C/C++, and none that we are aware of let you use any test
 generation method other than their own built-in random tester.  That's
 what we want:  GoogleTest, but with the ability to use libFuzzer, AFL,
 [HonggFuzz](https://github.com/google/honggfuzz), or what you will to generate data.
@@ -179,7 +179,7 @@ git clone https://github.com/agroce/rb_tree_demo
 cd rb_tree_demo
 make
 ```
-The makefile compiles everything with all the sanitizers I could think of (address, undefined, and integer) in order to catch more bugs in fuzzing.  This has a performance penalty, but is usually worth it.
+The makefile compiles everything with all the sanitizers we could think of (address, undefined, and integer) in order to catch more bugs in fuzzing.  This has a performance penalty, but is usually worth it.
 
 If you are on a Mac and using a non-Apple clang in order to get libFuzzer support, change `CC` and `CXX` in the [Makefile](https://github.com/agroce/rb_tree_demo/blob/master/Makefile) to point to the clang you are using (e.g. `/usr/local/opt/llvm\@6/bin/clang`).
 
@@ -411,7 +411,16 @@ Is this why John's fuzzer kills 25 mutants that DeepState does not?  Well, not q
 
 The DeepState fuzzer is not finding these because it runs each test in a fork, and so the address space doesn't allocate enough times to cause a problem for these particular checks!  Now, in theory, this shouldn't be the case for libFuzzer, which runs without forking.  And, sure enough, if we give the slow-and-steady tortoise libFuzzer 5 minutes instead of 60 seconds, it catches all of these mutants, too.  No amount of additional fuzzing will help the DeepState fuzzer.  In this case, the bug is strange enough and unlikely enough we can perhaps ignore it.  The issue is not the speed of our fuzzer, or the quality (exactly), but the fact that different fuzzing environments create subtle differences in _what tests we are actually running_.
 
-Now that we've seen this problem, we'll add an option to DeepState to make the brute force fuzzer run in a [non-forking mode](https://github.com/trailofbits/deepstate/issues/90) (by the time you read this, the option may already exist).  Unfortunately, this is not a great solution overall:  while libFuzzer "detects" these bugs, it can't produce a good saved test case for them, since the failure depends on all the `malloc`s that have been issued, and the exact addresses of certain pointers.  Perhaps this bug is not really worth our trouble, especially since libFuzzer can detect it.  I think we can say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
+Now that we've seen this problem, we'll add an option to DeepState to
+make the brute force fuzzer run in a
+[non-forking mode](https://github.com/trailofbits/deepstate/issues/90)
+(by the time you read this, the option may already exist).
+Unfortunately, this is not a great solution overall:  while libFuzzer
+"detects" these bugs, it can't produce a good saved test case for
+them, since the failure depends on all the `malloc`s that have been
+issued, and the exact addresses of certain pointers.  Perhaps this bug
+is not really worth our trouble, especially since libFuzzer can detect
+it.  We can safely say that, for most intents and purposes, DeepState is as powerful as John's "raw" fuzzer, as easy to implement, and considerably more convenient for debugging and regression testing.
 
 ### Examining the Mutants
 
@@ -455,7 +464,7 @@ If we were really testing this red-black tree as a critical piece of code, we wo
 
 - Make a tool (like a 10-line Python script, not anything heavyweight!) to throw out all mutants inside comments, inside the `InorderTreePrint` function, or that remove an assertion.
 
-- Compile all the mutants and compare binaries with each other and the original file, to throw out obvious equivalent mutants and redundant mutants.  This step can be a little annoying because compilers don't always produce equivalent binaries, due to timestamps generated at compile time, which is why I skipped over it in the discussion above.
+- Compile all the mutants and compare binaries with each other and the original file, to throw out obvious equivalent mutants and redundant mutants.  This step can be a little annoying because compilers don't always produce equivalent binaries, due to timestamps generated at compile time, which is why we skipped over it in the discussion above.
 
 - Examine the remaining mutants (maybe 200 or so) carefully, to make sure we're not missing anything.  Finding categories of "that's fine" mutants often makes this process much easier than it sounds off hand (things like "assertion removals are always ok").
 
@@ -502,13 +511,18 @@ INFO:deepstate:Passed: RBTree_TinySymex
 ...
 ```
 
-We can see how well [the 583 generated tests](https://github.com/agroce/rb_tree_demo/tree/master/symex.tests) perform using the same mutation analysis as before:
-
-```shell
-analyze_mutants red_black_tree.c "clang -c red_black_tree.c; clang++ -o symex symex.cpp -ldeepstate red_black_tree.o stack.o misc.o container.o; ./symex --input_test_dir out --abort_on_fail --log_level 2" --verbose --fromFile compile.txt --timeout 40 --mutantDir mutants
-```
-
-The results are not great.  The tests kill 264 mutants (23.57%).  They can be somewhat improved by adding back in the `checkRep` and `RBTreeVerify` checks that were removed in order to speed symbolic execution, by compiling `symex.cpp` with `-DREPLAY`.  Adding these checks kills an additional 165 mutants, bringing the kill rate up to 38.3% -- [429 mutants](https://github.com/agroce/rb_tree_demo/blob/master/symex.killed.mutants.txt).  While not impressive compared to the fuzzers, there is a very important point here.  Six of the mutants killed by the symbolic execution tests are ones _not_ killed by any of the fuzzers, even the well-seeded ten minute libFuzzer runs:
+We can see how well
+[the 583 generated tests](https://github.com/agroce/rb_tree_demo/tree/master/symex.tests)
+perform using mutation analysis as before.  Because we are just
+replaying the tests, not performing symbolic execution, we can now add
+back in the `checkRep` and
+`RBTreeVerify` checks that were removed in order to speed symbolic
+execution, by compiling `symex.cpp` with `-DREPLAY`, and compile
+everything with all of our sanitizers.  The results are not great.
+The tests kill 389 mutants (34.73%).  However, there is something more
+interesting than at first appears about these results.  Five of the
+389 mutants are ones not killed by any of our fuzzers, even in the
+well-seeded ten minute libFuzzer runs:
 
 ```
 703c703
@@ -518,10 +532,10 @@ The results are not great.  The tests kill 264 mutants (23.57%).  They can be so
 ```
 
 ```
-701c701
-<   right_black_cnt = checkRepHelper (node->right, t);
+703c703
+<   return left_black_cnt + (node->red ? 0 : 1);
 ---
->   /*right_black_cnt = checkRepHelper (node->right, t);*/
+>   /*return left_black_cnt + (node->red ? 0 : 1);*/
 ```
 
 ```
@@ -539,22 +553,33 @@ The results are not great.  The tests kill 264 mutants (23.57%).  They can be so
 ```
 
 ```
-703c703
-<   return left_black_cnt + (node->red ? 0 : 1);
+701c701
+<   right_black_cnt = checkRepHelper (node->right, t);
 ---
->   /*return left_black_cnt + (node->red ? 0 : 1);*/
+>   /*right_black_cnt = checkRepHelper (node->right, t);*/
 ```
+These bugs are all in the `checkRep` code itself, which was not even
+targeted by symbolic execution.  While these bugs do not involve
+actual faulty red-black tree behavior, they show that our fuzzers
+could allow subtle flaws to be introduced into the red-black tree's
+tools for checking its own validity; in another context, these could
+be equally serious faults, and certainly show a gap in the
+fuzzer-based testing.  In order to see how hard to detect these faults
+are, we tried using libFuzzer on each of these mutants, with our one
+hour corpus, for one hour.  It was still unable to detect any of these
+mutants.
 
-```
-236c236
-<   x->red=1;
----
->   /*x->red=1;*/
-
-```
-
-Five of these bugs are in the `checkRep` code, so may not be considered as critical (they won't cause bad behavior, just false positives in testing), but the last one is at the very start of `RBTreeInsert`.
-While generating tests using symbolic execution takes a while, producing tests like these occasionally and using them in regression can be extremely valuable.  The 583 tests take _less than a second_ to run, yet detect bugs that even aggressive fuzzing may miss.  Learning to use DeepState makes mixing fuzzing and symbolic execution in your testing easy; even if you need a new harness for symbolic execution work, it looks like, and can share code with, most of your fuzzing-based testing.  A major long-term goal for DeepState is to increase the scalability of symbolic execution for API sequence testing, using high-level strategies not dependent on the underlying engine, so you can use the same harness more often.
+While generating tests using symbolic execution takes more
+computational power, and, perhaps, more human effort, the very
+thorough, if limited in scope, tests that result can detect bugs that
+even aggressive fuzzing may miss.  Learning to use DeepState makes
+mixing fuzzing and symbolic execution in your testing easy; even if
+you need a new harness for symbolic execution work, it looks like, and
+can share code with, most of your fuzzing-based testing.  A major
+long-term goal for DeepState is to increase the scalability of
+symbolic execution for API sequence testing, using high-level
+strategies not dependent on the underlying engine, so you can use the
+same harness more often.
 
 See the [DeepState  repo](https://github.com/trailofbits/deepstate) for more information on how to use symbolic execution.
 
