@@ -453,9 +453,9 @@ Since we don't check the exact value of the `red` field, but use it to branch (s
 
 If we were really testing this red-black tree as a critical piece of code, we would probably at this point:
 
-- Definitely make a tool (like a 10-line Python script, not anything heavyweight!) to throw out all mutants inside comments, inside the `InorderTreePrint` function, or that remove an assertion.
+- Make a tool (like a 10-line Python script, not anything heavyweight!) to throw out all mutants inside comments, inside the `InorderTreePrint` function, or that remove an assertion.
 
-- We might compile all the mutants and compare binaries with each other and the original file, to throw out obvious equivalent mutants and redundant mutants.  This step can be a little annoying because compilers don't always produce equivalent binaries, due to timestamps generated at compile time, which is why I skipped over it in the discussion above.
+- Compile all the mutants and compare binaries with each other and the original file, to throw out obvious equivalent mutants and redundant mutants.  This step can be a little annoying because compilers don't always produce equivalent binaries, due to timestamps generated at compile time, which is why I skipped over it in the discussion above.
 
 - Examine the remaining mutants (maybe 200 or so) carefully, to make sure we're not missing anything.  Finding categories of "that's fine" mutants often makes this process much easier than it sounds off hand (things like "assertion removals are always ok").
 
