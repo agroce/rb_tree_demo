@@ -77,7 +77,7 @@ for varying the input values used in tests.  There are lots of
 [TSTL](https://github.com/agroce/tstl), but few sophisticated ones
 target C/C++, and none that we are aware of let you use any test
 generation method other than their own built-in random tester.  That's
-what we want:  GoogleTest, but with the ability to use libFuzzer, AFL,
+what we want:  GoogleTest, but with the ability to use [libFuzzer](https://llvm.org/docs/LibFuzzer.html), AFL,
 [HonggFuzz](https://github.com/google/honggfuzz), or what you will to generate data.
 
 ## Enter DeepState
@@ -199,7 +199,15 @@ mkdir corpus
 ./ds_rb_lf corpus -use_value_profile=1 -detect_leaks=0 -max_total_time=60
 ```
 
-This will run libFuzzer for 60 seconds, and place any interesting inputs (including test failures) in the corpus directory.  If there is a crash, it will leave a `crash-` file in the current directory.
+The `ds_rb_lf` executable is a normal libFuzzer executable, with the
+same [command line options](https://llvm.org/docs/LibFuzzer.html).
+This will run libFuzzer for 60 seconds, and place any interesting
+inputs (including test failures) in the `corpus` directory.  If there
+is a crash, it will leave a `crash-` file in the current directory.
+You can tune it to perform a little better in some cases by
+determining the maximum input size your tests use,  but this is a
+non-trivial exercise, and in our case at length 100 the gap between
+our max size and 4096 bytes is not extremely large.
 
 We can replay any DeepState-generated tests (from libFuzzer or DeepState's fuzzer) easily:
 
