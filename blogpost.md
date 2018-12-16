@@ -518,14 +518,22 @@ We can see how well
 [the 583 generated tests](https://github.com/agroce/rb_tree_demo/tree/master/symex.tests)
 perform using mutation analysis as before.  Because we are just
 replaying the tests, not performing symbolic execution, we can now add
-back in the `checkRep` and
-`RBTreeVerify` checks that were removed in order to speed symbolic
-execution, by compiling `symex.cpp` with `-DREPLAY`, and compile
-everything with all of our sanitizers.  The results are not great.
-The tests kill 389 mutants (34.73%).  However, there is something more
-interesting than at first appears about these results.  Five of the
-389 mutants are ones not killed by any of our fuzzers, even in the
-well-seeded ten minute libFuzzer runs:
+back in the `checkRep` and `RBTreeVerify` checks that were removed in
+order to speed symbolic execution, by compiling `symex.cpp` with
+`-DREPLAY`, and compile everything with all of our sanitizers.   The generated tests, which can be run (on a correct
+`red_black_tree.c`) in less than 1 second, kill 428 mutants (38.21%).
+This is considerably lower than for fuzzing, and worse than the > 70%
+kill rate for the libFuzzer one hour corpus, which has a similar runtime.  However,
+there is something more interesting than first appears about these
+results.  _Five of the killed mutants are ones not killed by any of our
+fuzzers, even in the well-seeded ten minute libFuzzer runs_:
+
+```
+703c703
+<   return left_black_cnt + (node->red ? 0 : 1);
+---
+>   return left_black_cnt / (node->red ? 0 : 1);
+```
 
 ```
 703c703
@@ -542,25 +550,20 @@ well-seeded ten minute libFuzzer runs:
 ```
 
 ```
+701c701
+<   right_black_cnt = checkRepHelper (node->right, t);
+---
+>   /*right_black_cnt = checkRepHelper (node->right, t);*/
+```
+
+```
 700c700
 <   left_black_cnt = checkRepHelper (node->left, t);
 ---
 >   /*left_black_cnt = checkRepHelper (node->left, t);*/
 ```
 
-```
-703c703
-<   return left_black_cnt + (node->red ? 0 : 1);
----
->   return left_black_cnt / (node->red ? 0 : 1);
-```
 
-```
-701c701
-<   right_black_cnt = checkRepHelper (node->right, t);
----
->   /*right_black_cnt = checkRepHelper (node->right, t);*/
-```
 These bugs are all in the `checkRep` code itself, which was not even
 targeted by symbolic execution.  While these bugs do not involve
 actual faulty red-black tree behavior, they show that our fuzzers
@@ -569,13 +572,14 @@ tools for checking its own validity; in the right context, these could
 be  serious faults, and certainly show a gap in the
 fuzzer-based testing.  In order to see how hard to detect these faults
 are, we tried using libFuzzer on each of these mutants, with our one
-hour corpus, for one hour.  It was still unable to detect any of these
+hour corpus as seed, for one additional hour of fuzzing on each mutant.  It was still unable to detect any of these
 mutants.
 
 While generating tests using symbolic execution takes more
 computational power, and, perhaps, more human effort, the very
-thorough, if limited in scope, tests that result can detect bugs that
-even aggressive fuzzing may miss.  Learning to use DeepState makes
+thorough (if limited in scope) tests that result can detect bugs that
+even aggressive fuzzing may miss.  Such tests are certainly a powerful
+addition to a regression test suite for an API.  Learning to use DeepState makes
 mixing fuzzing and symbolic execution in your testing easy; even if
 you need a new harness for symbolic execution work, it looks like, and
 can share code with, most of your fuzzing-based testing.  A major
