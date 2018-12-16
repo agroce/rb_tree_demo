@@ -95,12 +95,12 @@ Translating John's fuzzer into a DeepState test harness is relatively easy.  [He
      interesting API calls
    - DeepState will handle running multiple tests; the fuzzer or symbolic execution engine will provide the "outer loop"
 
-- Fix the length of each API call sequence to a fixed value, rather
-  than randomly choosing it.  The `#define LENGTH 100` at the top of
-  the file controls how many functions we call in each test.  Having
-  bytes be in somewhat the same positions in every test is helpful for
-  mutation-based fuzzers, and extremely long tests will go beyond
-  libFuzzer's default byte length
+- Fix the length of each API call sequence to a fixed value, rather than randomly choosing it.
+   - The `#define LENGTH 100` at the top of the file controls how many
+     functions we call in each test
+   - Having bytes be in somewhat the same positions in every test is helpful for
+      mutation-based fuzzers, and extremely long tests will go beyond
+      libFuzzer's default byte length
 
 - Replace various `rand() % NNN` calls with `DeepState_Int()`, `DeepState_Char()` and `DeepState_IntInRange(...)` calls
    - DeepState provides calls to generate most of the basic data types you want, optionally over restricted ranges
