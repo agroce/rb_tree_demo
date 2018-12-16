@@ -90,7 +90,8 @@ Translating John's fuzzer into a DeepState test harness is relatively easy.  [He
 - Remove `main` and replace it with a named test (`TEST(RBTree, GeneralFuzzer)`)
    - A DeepState file can contain more than one named test, though it is fine to only have one test
 
-- Rather than looping over creation of a red-black tree, just create one tree in each test
+- Just create one tree in each test, rather than having an outer loop
+  that iterates over calls that affect a single tree at a time
    - Instead of a fuzzing loop, our tests are closer to very generalized unit tests:  each test does one sequence of
      interesting API calls
    - DeepState will handle running multiple tests; the fuzzer or symbolic execution engine will provide the "outer loop"
