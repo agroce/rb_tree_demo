@@ -521,9 +521,9 @@ replaying the tests, not performing symbolic execution, we can now add
 back in the `checkRep` and `RBTreeVerify` checks that were removed in
 order to speed symbolic execution, by compiling `symex.cpp` with
 `-DREPLAY`, and compile everything with all of our sanitizers.   The generated tests, which can be run (on a correct
-`red_black_tree.c`) in less than 1 second, kill 428 mutants (38.21%).
-This is considerably lower than for fuzzing, and worse than the > 70%
-kill rate for the libFuzzer one hour corpus, which has a similar runtime.  However,
+`red_black_tree.c`) in less than a second, kill 428 mutants (38.21%).
+This is considerably lower than for fuzzing, and worse than the 797 (71.16%)
+killed by the libFuzzer one hour corpus, which has a similar < 1s runtime.  However,
 there is something more interesting than first appears about these
 results.  _Five of the killed mutants are ones not killed by any of our
 fuzzers, even in the well-seeded ten minute libFuzzer runs_:
