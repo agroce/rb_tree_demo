@@ -168,7 +168,7 @@ CC=/usr/local/opt/llvm\@6/bin/clang CXX=/usr/local/opt/llvm\@6/bin/clang++ BUILD
 sudo make install
 ```
 
-AFL can also be used to generate inputs for DeepState, but most of the time, raw speed (due to not needing to fork), decomposition of compares, and value profiles seem to give libFuzzer an edge for this kind of API testing, in our (limited experimentally!) experience.  For more on using AFL and other file-based fuzzers with DeepState, see the [DeepState README](https://github.com/trailofbits/deepstate/blob/master/README.md).
+AFL can also be used to generate inputs for DeepState, but most of the time, raw speed (due to not needing to fork), decomposition of compares, and value profiles seem to give libFuzzer an edge for this kind of API testing, in our (limited experimentally!) experience.  For more on using AFL and other file-based fuzzers with DeepState, see the [DeepState README](https://github.com/trailofbits/deepstate/blob/master/README.md#fuzzing-with-afl).
 
 ### Using the DeepState Red-Black Tree Fuzzer
 
