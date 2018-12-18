@@ -517,8 +517,10 @@ removals.  In fact, this more aggressive (and time-consuming) fuzzing
 kills zero additional mutants over the ones already killed by John's
 fuzzer in one minute and libFuzzer in five minutes.  Even an hour-long
 libFuzzer run with the hour-long corpus adds very few additional
-mutants, and those not very interesting (e.g., one new kill removes a `free` call, and the memory leak
-eventually kills libFuzzer).  Is this solid evidence our remaining mutants (assuming we haven't examined them all yet) are harmless?  We'll see.
+mutants, and those not very interesting (e.g., one new kill removes a
+`free` call, and the memory leak eventually kills libFuzzer).  Is this
+solid evidence our remaining mutants (assuming we haven't examined
+them all yet) are harmless?  We'll see.
 
 ## What About Symbolic Execution?
 
