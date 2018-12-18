@@ -492,7 +492,33 @@ The process of (1) making a test generator then (2) applying mutation testing an
 
 ## Just Fuzz it More
 
-Alternatively, before turning to mutant investigation, you can just fuzz the code more aggressively.  Our mutant sample suggests there won't be _many_ outstanding bugs, but perhaps there are a few.  Five minutes is not that extreme a fuzzing regimen; people expect to run AFL for days.  If we were really testing the red-black tree as a critical piece of code, we probably wouldn't give up after five minutes.  Which fuzzer would be best for this?  It's hard to know for sure, but one reasonable approach would be to first use libFuzzer to generate a large corpus of tests to seed fuzzing, that achieve high coverage on the un-mutated red-black tree.  Then, we can run a longer fuzzing run on each mutant, using the seeds to make sure we're not spending most of the time just "learning" the red-black tree API.  So, after generating a corpus on the original code for an hour, we run libFuzzer, starting from that corpus, for ten minutes.  The tests we generated this way can be found [here](https://github.com/agroce/rb_tree_demo/tree/master/libfuzzer.tests). How many additional mutants does this kill?  We can already guess it will be fewer than 30, based on our 3% sample.  A simple script, as described above, brings the number of [interesting, unkilled, mutants to analyze down to 174](https://github.com/agroce/rb_tree_demo/blob/master/interesting.mutants.txt) by removing comment mutations, print function mutations, and assertion removals.  In fact, this more aggressive (and time-consuming) fuzzing kills zero additional mutants over the ones already killed by John's fuzzer in one minute and libFuzzer in five minutes.  Is this solid evidence our remaining mutants (assuming we haven't examined them all yet) are harmless?  We'll see.
+Alternatively, before turning to mutant investigation, you can just
+fuzz the code more aggressively.  Our mutant sample suggests there
+won't be _many_ outstanding bugs, but perhaps there are a few.  Five
+minutes is not that extreme a fuzzing regimen; people expect to run
+AFL for days.  If we were really testing the red-black tree as a
+critical piece of code, we probably wouldn't give up after five
+minutes.  Which fuzzer would be best for this?  It's hard to know for
+sure, but one reasonable approach would be to first use libFuzzer to
+generate a large corpus of tests to seed fuzzing, that achieve high
+coverage on the un-mutated red-black tree.  Then, we can run a longer
+fuzzing run on each mutant, using the seeds to make sure we're not
+spending most of the time just "learning" the red-black tree API.  So,
+after generating a corpus on the original code for an hour, we run
+libFuzzer, starting from that corpus, for ten minutes.  The tests we
+generated this way can be found
+[here](https://github.com/agroce/rb_tree_demo/tree/master/libfuzzer.tests). How
+many additional mutants does this kill?  We can already guess it will
+be fewer than 30, based on our 3% sample.  A simple script, as
+described above, brings the number of
+[interesting, unkilled, mutants to analyze down to 174](https://github.com/agroce/rb_tree_demo/blob/master/interesting.mutants.txt)
+by removing comment mutations, print function mutations, and assertion
+removals.  In fact, this more aggressive (and time-consuming) fuzzing
+kills zero additional mutants over the ones already killed by John's
+fuzzer in one minute and libFuzzer in five minutes.  Even an hour-long
+libFuzzer run with the hour-long corpus adds very few additional
+mutants, and those not very interesting (e.g., one new kill removes a `free` call, and the memory leak
+eventually kills libFuzzer).  Is this solid evidence our remaining mutants (assuming we haven't examined them all yet) are harmless?  We'll see.
 
 ## What About Symbolic Execution?
 
