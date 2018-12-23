@@ -77,12 +77,12 @@ TEST(RBTree, TinySymex) {
     ip = (int*)malloc(sizeof(int));
     *ip = key;
     vp = voidP();
-    LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;  
+    LOG(TRACE) << n << ": INSERT:" << *ip << " " << vp;  
     RBTreeInsert(tree, ip, vp);
     containerInsert(*ip, vp);
 
     key = DeepState_Int();
-    LOG(INFO) << n << ": DELETE:" << key;  
+    LOG(TRACE) << n << ": DELETE:" << key;  
     if ((node = RBExactQuery(tree, &key))) {
       ASSERT(containerFind(key)) << "Expected to find " << key;
       RBDelete(tree, node);
@@ -92,9 +92,9 @@ TEST(RBTree, TinySymex) {
     }
 
 #ifdef REPLAY
-    LOG(INFO) << "checkRep...";
+    LOG(TRACE) << "checkRep...";
     checkRep(tree); 
-    LOG(INFO) << "RBTreeVerify...";   
+    LOG(TRACE) << "RBTreeVerify...";   
     RBTreeVerify(tree);
 #endif
   }

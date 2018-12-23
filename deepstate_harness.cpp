@@ -83,13 +83,13 @@ TEST(RBTree, GeneralFuzzer) {
 
   noDuplicates = DeepState_Bool();
   if (noDuplicates) {
-    LOG(INFO) << "No duplicates allowed.";
+    LOG(TRACE) << "No duplicates allowed.";
   }
 
   restrictValues = DeepState_Bool();
   if (restrictValues) {
     valueRange = DeepState_IntInRange(1, LENGTH+1);
-    LOG(INFO) << "Restricting range of values to 0..." << valueRange;
+    LOG(TRACE) << "Restricting range of values to 0..." << valueRange;
   }
   
   for (int n = 0; n < LENGTH; n++) {
@@ -100,17 +100,17 @@ TEST(RBTree, GeneralFuzzer) {
 	    *ip = key;
 	    if (!noDuplicates || !containerFind(*ip)) {
 	      void* vp = voidP();
-	      LOG(INFO) << n << ": INSERT:" << *ip << " " << vp;
+	      LOG(TRACE) << n << ": INSERT:" << *ip << " " << vp;
 	      RBTreeInsert(tree, ip, vp);
 	      containerInsert(*ip, vp);
 	    } else {
-	      LOG(INFO) << n << ": AVOIDING DUPLICATE INSERT:" << *ip;
+	      LOG(TRACE) << n << ": AVOIDING DUPLICATE INSERT:" << *ip;
 	      free(ip);	      
 	    }
 	  },
 	  [&] {
 	    int key = GetValue();
-	    LOG(INFO) << n << ": FIND:" << key;
+	    LOG(TRACE) << n << ": FIND:" << key;
 	    if ((node = RBExactQuery(tree, &key))) {
 	      ASSERT(containerFind(key)) << "Expected to find " << key;
 	    } else {
@@ -119,7 +119,7 @@ TEST(RBTree, GeneralFuzzer) {
 	  },
 	  [&] {
 	    int key = GetValue();
-	    LOG(INFO) << n << ": DELETE:" << key;
+	    LOG(TRACE) << n << ": DELETE:" << key;
 	    if ((node = RBExactQuery(tree, &key))) {
 	      ASSERT(containerFind(key)) << "Expected to find " << key;
 	      RBDelete(tree, node);
@@ -131,7 +131,7 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int key1 = GetValue();	    
 	    int res, key2;
-	    LOG(INFO) << n << ": PRED:" << key1;
+	    LOG(TRACE) << n << ": PRED:" << key1;
 	    res = containerPred(key1, &key2);
 	    if ((node = RBExactQuery(tree, &key1))) {
 	      node = TreePredecessor(tree, node);
@@ -151,7 +151,7 @@ TEST(RBTree, GeneralFuzzer) {
 	  [&] {
 	    int key1 = GetValue();	    
 	    int res, key2;
-	    LOG(INFO) << n << ": SUCC:" << key1;
+	    LOG(TRACE) << n << ": SUCC:" << key1;
 	    res = containerSucc(key1, &key2);
 	    if ((node = RBExactQuery(tree, &key1))) {
 	      node = TreeSuccessor(tree, node);
@@ -187,11 +187,11 @@ TEST(RBTree, GeneralFuzzer) {
 	    free(enumResult);
 	  }
 	  );
-    LOG(INFO) << "checkRep...";
+    LOG(TRACE) << "checkRep...";
     checkRep(tree); 
-    LOG(INFO) << "RBTreeVerify...";   
+    LOG(TRACE) << "RBTreeVerify...";   
     RBTreeVerify(tree);
   }
-  LOG(INFO) << "Destroying the tree...";
+  LOG(TRACE) << "Destroying the tree...";
   RBTreeDestroy(tree);
 }
