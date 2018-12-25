@@ -14,8 +14,8 @@ OBJSDS = red_black_tree.o stack.o misc.o container.o
 
 OBJSDSLF = lf_red_black_tree.o lf_stack.o lf_misc.o lf_container.o
 
-CC ?= clang
-CXX ?= clang++
+CC = clang
+CXX = clang++
 
 CFLAGS = -O3 -Wall -pedantic -g -fsanitize=undefined,integer,address
 
