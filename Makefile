@@ -18,8 +18,8 @@ ifeq ($(origin CC),default)
 CC = clang
 endif
 
-ifeq ($(origin CC),default)
-CC = clang++
+ifeq ($(origin CXX),default)
+CXX = clang++
 endif
 
 CFLAGS = -O3 -Wall -pedantic -g -fsanitize=undefined,integer,address
