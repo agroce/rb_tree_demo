@@ -37,7 +37,7 @@ DS2 = ds_rb_lf
 # easy fuzzer
 EASY = easy_ds_rb
 
-all: $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2)
+all: $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) $(EASY)
 
 $(PROGRAM): 	$(OBJS)
 		$(CC) $(CFLAGS) $(OBJS) -o $(PROGRAM) $(DMALLOC_LIB)
@@ -52,7 +52,7 @@ $(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
 
 $(EASY): 	$(OBJSDS) deepstate_harness.cpp
-		$(CXX) -std=c++14 $(CFLAGS) -o $(EASY) easy_deepstate_harness.cpp $(OBJSDS) -ldeepstate
+		$(CXX) -std=c++14 $(CFLAGS) -o $(EASY) easy_deepstate_fuzzer.cpp $(OBJSDS) -ldeepstate
 
 test_red_black_tree.o:	test_red_black_tree.c red_black_tree.c stack.c stack.h red_black_tree.h misc.h
 
@@ -73,7 +73,7 @@ lf_misc.o:		misc.h misc.c
 			$(CC) $(CFLAGS) -c -o lf_misc.o misc.c -fsanitize=fuzzer-no-link,undefined,address,integer
 
 clean:			
-	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) *.gcda *.gcno *.gcov
+	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) $(EASY) *.gcda *.gcno *.gcov
 
 
 
