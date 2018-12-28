@@ -34,6 +34,9 @@ DS1 = ds_rb
 # libFuzzer executable
 DS2 = ds_rb_lf
 
+# easy fuzzer
+EASY = easy_ds_rb
+
 all: $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2)
 
 $(PROGRAM): 	$(OBJS)
@@ -47,6 +50,9 @@ $(DS1): 	$(OBJSDS) deepstate_harness.cpp
 
 $(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
+
+$(EASY): 	$(OBJSDS) deepstate_harness.cpp
+		$(CXX) -std=c++14 $(CFLAGS) -o $(EASY) easy_deepstate_harness.cpp $(OBJSDS) -ldeepstate
 
 test_red_black_tree.o:	test_red_black_tree.c red_black_tree.c stack.c stack.h red_black_tree.h misc.h
 
