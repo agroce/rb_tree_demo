@@ -51,7 +51,7 @@ $(DS1): 	$(OBJSDS) deepstate_harness.cpp
 $(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
 
-$(EASY): 	$(OBJSDS) deepstate_harness.cpp
+$(EASY): 	$(OBJSDS) easy_deepstate_fuzzer.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(EASY) easy_deepstate_fuzzer.cpp $(OBJSDS) -ldeepstate
 
 test_red_black_tree.o:	test_red_black_tree.c red_black_tree.c stack.c stack.h red_black_tree.h misc.h
