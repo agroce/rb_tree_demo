@@ -9,6 +9,8 @@ extern "C" {
 #include "container.h"
 }
 
+#define DEEPSTATE_TAKEOVER_RAND
+
 #include <deepstate/DeepState.hpp>
 
 using namespace deepstate;
