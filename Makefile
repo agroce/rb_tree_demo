@@ -22,7 +22,7 @@ ifeq ($(origin CXX),default)
 CXX = clang++
 endif
 
-CFLAGS = -O3 -Wall -pedantic -g -fsanitize=undefined,integer,address
+CFLAGS = -O3 -Wall -pedantic -g
 
 PROGRAM = test_rb
 
@@ -31,13 +31,16 @@ PROGRAM2 = fuzz_rb
 # DeepState executable
 DS1 = ds_rb
 
+# DeepState executable
+DSSAN = ds_rb_san
+
 # libFuzzer executable
 DS2 = ds_rb_lf
 
 # easy fuzzer
 EASY = easy_ds_rb
 
-all: $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) $(EASY)
+all: $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) $(DSSAN) $(EASY)
 
 $(PROGRAM): 	$(OBJS)
 		$(CC) $(CFLAGS) $(OBJS) -o $(PROGRAM) $(DMALLOC_LIB)
@@ -47,6 +50,9 @@ $(PROGRAM2): 	$(OBJS2)
 
 $(DS1): 	$(OBJSDS) deepstate_harness.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate
+
+$(DSSAN): 	$(OBJSDS) deepstate_harness.cpp
+		$(CXX) -std=c++14 $(CFLAGS) -fsanitize=undefined,integer,address -o $(DSSAN) deepstate_harness.cpp $(OBJSDS) -ldeepstate
 
 $(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
@@ -73,7 +79,7 @@ lf_misc.o:		misc.h misc.c
 			$(CC) $(CFLAGS) -c -o lf_misc.o misc.c -fsanitize=fuzzer-no-link,undefined,address,integer
 
 clean:			
-	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DS2) $(EASY) *.gcda *.gcno *.gcov
+	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DSSAN) $(DS2) $(EASY) *.gcda *.gcno *.gcov
 
 
 
