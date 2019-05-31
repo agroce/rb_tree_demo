@@ -14,6 +14,8 @@ OBJSDS = red_black_tree.o stack.o misc.o container.o
 
 OBJSDSLF = lf_red_black_tree.o lf_stack.o lf_misc.o lf_container.o
 
+OBJSDSSAN = san_red_black_tree.o san_stack.o san_misc.o san_container.o
+
 ifeq ($(origin CC),default)
 CC = clang
 endif
@@ -51,8 +53,8 @@ $(PROGRAM2): 	$(OBJS2)
 $(DS1): 	$(OBJSDS) deepstate_harness.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(DS1) deepstate_harness.cpp $(OBJSDS) -ldeepstate
 
-$(DSSAN): 	$(OBJSDS) deepstate_harness.cpp
-		$(CXX) -std=c++14 $(CFLAGS) -fsanitize=undefined,integer,address -o $(DSSAN) deepstate_harness.cpp $(OBJSDS) -ldeepstate
+$(DSSAN): 	$(OBJSDSSAN) deepstate_harness.cpp
+		$(CXX) -std=c++14 $(CFLAGS) -fsanitize=undefined,integer,address -o $(DSSAN) deepstate_harness.cpp $(OBJSDSSAN) -ldeepstate
 
 $(DS2): 	$(OBJSDSLF) deepstate_harness.cpp
 		$(CXX) -std=c++14 $(CFLAGS) -o $(DS2) deepstate_harness.cpp $(OBJSDSLF) -ldeepstate_LF -fsanitize=fuzzer,undefined,integer,address
@@ -77,6 +79,18 @@ lf_container.o:		container.c container.h
 
 lf_misc.o:		misc.h misc.c
 			$(CC) $(CFLAGS) -c -o lf_misc.o misc.c -fsanitize=fuzzer-no-link,undefined,address,integer
+
+san_red_black_tree.o:	red_black_tree.h stack.h red_black_tree.c stack.c misc.h misc.c
+			$(CC) $(CFLAGS) -c -o san_red_black_tree.o red_black_tree.c -fsanitize=undefined,address,integer
+
+san_stack.o:		stack.c stack.h misc.h misc.c
+			$(CC) $(CFLAGS) -c -o san_stack.o stack.c -fsanitize=undefined,address,integer
+
+san_container.o:		container.c container.h
+			$(CC) $(CFLAGS) -c -o san_container.o container.c -fsanitize=undefined,address,integer
+
+san_misc.o:		misc.h misc.c
+			$(CC) $(CFLAGS) -c -o san_misc.o misc.c -fsanitize=undefined,address,integer
 
 clean:			
 	rm -f *.o *~ $(PROGRAM) $(PROGRAM2) $(DS1) $(DSSAN) $(DS2) $(EASY) *.gcda *.gcno *.gcov
