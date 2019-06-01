@@ -48,7 +48,7 @@ DSAFL = ds_rb_afl
 # easy fuzzer
 EASY = easy_ds_rb
 
-all: $(UNIT) $(JOHNFUZZ) $(DS) $(DSLF) $(DSSAN) $(EASY)
+all: $(UNIT) $(JOHNFUZZ) $(DS) $(DSLF) $(DSAFL) $(DSSAN) $(EASY)
 
 $(UNIT): 	$(OBJS)
 		$(CC) $(CFLAGS) $(OBJS) -o $(UNIT) $(DMALLOC_LIB)
@@ -114,7 +114,7 @@ san_misc.o:		misc.h misc.c
 			$(CC) $(CFLAGS) -c -o san_misc.o misc.c -fsanitize=undefined,address,integer
 
 clean:			
-	rm -f *.o *~ $(UNIT) $(JOHNFUZZ) $(DS) $(DSSAN) $(DSLF) $(EASY) *.gcda *.gcno *.gcov
+	rm -f *.o *~ $(UNIT) $(JOHNFUZZ) $(DS) $(DSSAN) $(DSLF) $(DSAFL) $(EASY) *.gcda *.gcno *.gcov
 
 
 
