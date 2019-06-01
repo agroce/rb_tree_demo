@@ -90,16 +90,16 @@ lf_misc.o:		misc.h misc.c
 			$(CC) $(CFLAGS) -c -o lf_misc.o misc.c -fsanitize=fuzzer-no-link,undefined,address,integer
 
 afl_red_black_tree.o:	red_black_tree.h stack.h red_black_tree.c stack.c misc.h misc.c
-			afl-clang $(CFLAGS) -c -o lf_red_black_tree.o red_black_tree.c
+			afl-clang $(CFLAGS) -c -o afl_red_black_tree.o red_black_tree.c
 
 afl_stack.o:		stack.c stack.h misc.h misc.c
-			afl-clang $(CFLAGS) -c -o lf_stack.o stack.c
+			afl-clang $(CFLAGS) -c -o afl_stack.o stack.c
 
 afl_container.o:		container.c container.h
-			afl-clang $(CFLAGS) -c -o lf_container.o container.c
+			afl-clang $(CFLAGS) -c -o afl_container.o container.c
 
 afl_misc.o:		misc.h misc.c
-			afl-clang $(CFLAGS) -c -o lf_misc.o misc.c
+			afl-clang $(CFLAGS) -c -o afl_misc.o misc.c
 
 san_red_black_tree.o:	red_black_tree.h stack.h red_black_tree.c stack.c misc.h misc.c
 			$(CC) $(CFLAGS) -c -o san_red_black_tree.o red_black_tree.c -fsanitize=undefined,address,integer
